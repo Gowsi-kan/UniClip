@@ -1,0 +1,225 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:UniClip.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="820"
+             x:Class="UniClip.Views.MainView"
+             x:DataType="vm:MainViewModel">
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <Grid Background="#0C1110">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="1160" HorizontalAlignment="Center" Spacing="30" Margin="28,24,28,40">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Width="42" Height="42" CornerRadius="14" Background="#B8F36B">
+                            <TextBlock Text="u" Foreground="#14200D" FontSize="26" FontWeight="Bold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="unclip" Foreground="#F1F5EF" FontSize="21" FontWeight="SemiBold" />
+                            <TextBlock Text="YOUR DEVICES, IN SYNC" Foreground="#89958A" FontSize="9" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Border Grid.Column="1" CornerRadius="18" Background="#171F1B" BorderBrush="#29332C" BorderThickness="1"
+                            Padding="12,8" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Ellipse Width="7" Height="7" Fill="#879387" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionStatus}" Foreground="#C5CEC4" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" Background="#202823" Margin="0,20,0,0" />
+                </Grid>
+
+                <StackPanel Spacing="8">
+                    <TextBlock Text="A little less friction." Foreground="#F3F6F1" FontSize="34" FontWeight="SemiBold"
+                               TextWrapping="Wrap" />
+                    <TextBlock Text="Move text and files between your devices. Privately, over your local network." Foreground="#A1ABA1"
+                               FontSize="15" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Border Background="#141B17" BorderBrush="#28332C" BorderThickness="1" CornerRadius="22" Padding="20">
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                        <StackPanel Spacing="7">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="PRIVATE BY DESIGN" Foreground="#B8F36B" FontSize="10" FontWeight="Bold"
+                                           />
+                                <Border Background="#202A23" CornerRadius="8" Padding="7,3">
+                                    <TextBlock Text="LAN FIRST" Foreground="#CFD8CE" FontSize="9" FontWeight="SemiBold"
+                                               />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Your stuff stays yours." Foreground="#F0F4EF" FontSize="21" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="Device pairing now uses a QR invite and the libp2p Noise handshake with X25519. Relay fallback is still planned. No account or cloud upload is required."
+                                       Foreground="#A1ABA1" FontSize="13" MaxWidth="650" TextWrapping="Wrap" LineHeight="20" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="54" Height="54" CornerRadius="18" Background="#202A23"
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="20,0,0,0">
+                            <TextBlock Text="⌁" Foreground="#B8F36B" FontSize="31" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="9" Margin="0,18,0,0">
+                            <Border CornerRadius="12" Background="#202A23" Padding="11,8">
+                                <TextBlock Text="Noise · X25519" Foreground="#BBC6BA" FontSize="11" />
+                            </Border>
+                            <Border CornerRadius="12" Background="#202A23" Padding="11,8">
+                                <TextBlock Text="LAN · mDNS" Foreground="#BBC6BA" FontSize="11" />
+                            </Border>
+                            <Border CornerRadius="12" Background="#202A23" Padding="11,8">
+                                <TextBlock Text="Relay fallback · planned" Foreground="#BBC6BA" FontSize="11" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                    <Border Background="#141B17" BorderBrush="#28332C" BorderThickness="1" CornerRadius="22" Padding="20">
+                        <StackPanel Spacing="17">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="CLIPBOARD" Foreground="#89958A" FontSize="10" FontWeight="Bold"
+                                               />
+                                    <TextBlock Text="Pick up where you left off." Foreground="#F0F4EF" FontSize="18"
+                                               FontWeight="SemiBold" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Width="38" Height="38" CornerRadius="12" Background="#202A23">
+                                    <TextBlock Text="▣" Foreground="#B8F36B" FontSize="18" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                            <Border Background="#0F1511" BorderBrush="#27312A" BorderThickness="1" CornerRadius="14"
+                                    Padding="14" MinHeight="86">
+                                <TextBlock Text="{Binding ClipboardPreview}" Foreground="#BBC5BA" FontSize="13"
+                                           TextWrapping="Wrap" LineHeight="19" />
+                            </Border>
+                            <Button Content="Preview local clipboard" Click="PreviewClipboard_OnClick"
+                                    HorizontalAlignment="Left" Classes="secondary" />
+                            <ToggleSwitch Content="Enable clipboard sync"
+                                          IsChecked="{Binding IsClipboardSyncEnabled}"
+                                          IsEnabled="{Binding CanClipboardSync}" />
+                            <TextBlock Text="{Binding ClipboardSyncStatus}" Foreground="#B8F36B"
+                                       FontSize="11" TextWrapping="Wrap" />
+                            <TextBlock Text="Only new text is shared. Enable on both devices; clipboard contents can be sensitive. Max 256 KiB."
+                                       Foreground="#778278"
+                                       FontSize="11" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Background="#141B17" BorderBrush="#28332C" BorderThickness="1" CornerRadius="22"
+                            Padding="20">
+                        <StackPanel Spacing="17">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="FILE DROP" Foreground="#89958A" FontSize="10" FontWeight="Bold"
+                                               />
+                                    <TextBlock Text="Send a file in a moment." Foreground="#F0F4EF" FontSize="18"
+                                               FontWeight="SemiBold" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Width="38" Height="38" CornerRadius="12" Background="#202A23">
+                                    <TextBlock Text="↥" Foreground="#B8F36B" FontSize="20" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                            <Border Background="#0F1511" BorderBrush="#27312A" BorderThickness="1" CornerRadius="14"
+                                    Padding="14" MinHeight="86">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding FilePickerStatus}" Foreground="#BBC5BA" FontSize="13"
+                                               TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding SelectedFiles}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Foreground="#89958A" FontSize="11"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                            <Button Content="Choose files" Click="ChooseFiles_OnClick" HorizontalAlignment="Left"
+                                    Classes="primary" />
+                            <Button Content="Send selected files" Command="{Binding SendSelectedFilesCommand}"
+                                    IsEnabled="{Binding CanSendFiles}" HorizontalAlignment="Left" />
+                            <Border IsVisible="{Binding HasIncomingTransferRequest}" Background="#202A23"
+                                    BorderBrush="#354136" BorderThickness="1" CornerRadius="14" Padding="12">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Incoming file · approve to receive" Foreground="#B8F36B"
+                                               FontSize="11" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding IncomingTransferPrompt}" Foreground="#D6DFD3"
+                                               FontSize="11" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Content="Accept" Command="{Binding AcceptIncomingTransferCommand}"
+                                                Classes="primary" />
+                                        <Button Content="Decline" Command="{Binding RejectIncomingTransferCommand}"
+                                                Classes="secondary" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Text="{Binding TransferStatus}" Foreground="#A1ABA1"
+                                       FontSize="11" TextWrapping="Wrap" />
+                            <TextBlock Text="Transfers are chunked, SHA-256 verified, and require recipient approval"
+                                       Foreground="#778278"
+                                       FontSize="11" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Your devices" Foreground="#F0F4EF" FontSize="19" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding ConnectionStatus}" Foreground="#89958A"
+                                   FontSize="12" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Border Grid.Column="1" CornerRadius="12" Background="#171F1B" BorderBrush="#29332C"
+                            BorderThickness="1" Padding="12,8" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding PairedDeviceCount, StringFormat='{}{0} PAIRED'}"
+                                   Foreground="#A1ABA1" FontSize="10" FontWeight="Bold"
+                                   />
+                    </Border>
+                </Grid>
+
+                <Border Background="#111713" BorderBrush="#263029" BorderThickness="1" CornerRadius="18" Padding="22">
+                    <StackPanel HorizontalAlignment="Center" Spacing="10" MaxWidth="360">
+                        <Border Width="46" Height="46" CornerRadius="16" Background="#202A23"
+                                HorizontalAlignment="Center">
+                            <TextBlock Text="⌕" Foreground="#B8F36B" FontSize="24" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="No devices paired yet" Foreground="#E7EDE5" FontSize="15" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" TextWrapping="Wrap" />
+                        <TextBlock Text="Create a short-lived invite on one device, then use its code here to establish an authenticated Noise session."
+                                   Foreground="#89958A" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"
+                                   LineHeight="18" />
+                        <Button Content="Create QR invite" Command="{Binding CreatePairingInviteCommand}"
+                                IsEnabled="{Binding CanPair}" HorizontalAlignment="Center" Margin="0,4,0,0"
+                                Classes="primary" />
+                        <TextBlock Text="{Binding PairingStatus}" Foreground="#A1ABA1" FontSize="11"
+                                   TextAlignment="Center" TextWrapping="Wrap" />
+                        <StackPanel IsVisible="{Binding HasPairingInvite}" Spacing="10" HorizontalAlignment="Center">
+                            <Image Source="{Binding PairingQrCode}" Width="200" Height="200"
+                                   HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding PairingInviteCode}" IsReadOnly="True" AcceptsReturn="True"
+                                     TextWrapping="Wrap" MaxHeight="76" MinWidth="280" />
+                            <Button Content="Copy invite code" Click="CopyPairingInvite_OnClick"
+                                    HorizontalAlignment="Center" Classes="secondary" />
+                        </StackPanel>
+                        <TextBox Text="{Binding InvitationInput}" PlaceholderText="Paste a UniClip pairing invite"
+                                 AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="80" MinWidth="280" />
+                        <Button Content="Connect and verify" Command="{Binding ConnectToInviteCommand}"
+                                IsEnabled="{Binding CanPair}" HorizontalAlignment="Center"
+                                Classes="secondary" />
+                        <TextBlock Text="{Binding PairedDeviceCount, StringFormat='{}{0} PAIRED'}"
+                                   Foreground="#A1ABA1" FontSize="10" FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="UNCLIP  ·  PRIVATE DEVICE-TO-DEVICE SHARING" Foreground="#58635A" FontSize="9"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
