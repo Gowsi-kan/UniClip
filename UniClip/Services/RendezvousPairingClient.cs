@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -121,46 +122,98 @@ public static class RendezvousPairingClient
     }
 
     private static async Task<IReadOnlyList<IPAddress>> DiscoverServersAsync(
-        CancellationToken cancellationToken)
+    CancellationToken cancellationToken)
     {
+        const string Tag = "[Discovery]";
+        var sw = Stopwatch.StartNew();
+
         using var socket = new UdpClient(AddressFamily.InterNetwork)
         {
             EnableBroadcast = true
         };
         socket.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+        Debug.WriteLine($"{Tag} Socket bound to {socket.Client.LocalEndPoint}, broadcast={socket.EnableBroadcast}");
 
         var request = Encoding.ASCII.GetBytes(DiscoveryRequest);
-        var targets = GetDiscoveryTargets();
+        var targets = GetDiscoveryTargets().ToArray();
+        Debug.WriteLine($"{Tag} Request=\"{DiscoveryRequest}\" ({request.Length} bytes), port={DiscoveryPort}, targets={targets.Length}");
+
         foreach (var target in targets)
         {
-            await socket.SendAsync(
-                request,
-                new IPEndPoint(target, DiscoveryPort),
-                cancellationToken);
+            try
+            {
+                var sent = await socket.SendAsync(
+                    request,
+                    new IPEndPoint(target, DiscoveryPort),
+                    cancellationToken);
+                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Sent {sent} bytes -> {target}:{DiscoveryPort}");
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Send FAILED -> {target}: {ex.GetType().Name}: {ex.Message}");
+                throw;
+            }
         }
 
         using var discoveryTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         discoveryTimeout.CancelAfter(TimeSpan.FromSeconds(2));
+        Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Waiting for responses (2 s window)...");
+
         var servers = new HashSet<IPAddress>();
         var responseBytes = Encoding.ASCII.GetBytes(DiscoveryResponse);
+        var received = 0;
+
         while (!discoveryTimeout.IsCancellationRequested)
         {
             try
             {
                 var response = await socket.ReceiveAsync(discoveryTimeout.Token);
-                if (response.Buffer.AsSpan().SequenceEqual(responseBytes) &&
-                    !IsLocalAddress(response.RemoteEndPoint.Address))
+                received++;
+                var remote = response.RemoteEndPoint;
+                var matches = response.Buffer.AsSpan().SequenceEqual(responseBytes);
+                var isLocal = IsLocalAddress(remote.Address);
+
+                Debug.WriteLine(
+                    $"{Tag} [{sw.ElapsedMilliseconds} ms] RX #{received} from {remote}, {response.Buffer.Length} bytes, match={matches}, local={isLocal}");
+
+                if (!matches)
                 {
-                    servers.Add(response.RemoteEndPoint.Address);
+                    var preview = response.Buffer.AsSpan(0, Math.Min(response.Buffer.Length, 64));
+                    Debug.WriteLine($"{Tag}   mismatch payload hex={Convert.ToHexString(preview)} ascii=\"{Encoding.ASCII.GetString(preview)}\"");
+                }
+                else if (isLocal)
+                {
+                    Debug.WriteLine($"{Tag}   ignored (own address)");
+                }
+                else if (servers.Add(remote.Address))
+                {
+                    Debug.WriteLine($"{Tag}   server added: {remote.Address}");
+                }
+                else
+                {
+                    Debug.WriteLine($"{Tag}   duplicate: {remote.Address}");
                 }
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
+                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Discovery window elapsed");
                 break;
+            }
+            catch (SocketException ex)
+            {
+                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Receive SocketException {ex.SocketErrorCode} ({ex.ErrorCode}): {ex.Message}");
+                throw;
             }
         }
 
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Cancelled by caller");
+        }
         cancellationToken.ThrowIfCancellationRequested();
+
+        Debug.WriteLine(
+            $"{Tag} Done in {sw.ElapsedMilliseconds} ms: {received} packets, {servers.Count} server(s): [{string.Join(", ", servers)}]");
         return servers.ToArray();
     }
 
