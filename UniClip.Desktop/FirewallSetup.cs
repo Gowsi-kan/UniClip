@@ -37,13 +37,13 @@ internal static class FirewallSetup
             return result switch
             {
                 FirewallResult.Cancelled =>
-                    "Firewall setup was canceled. Set Wi-Fi to Private and allow TCP 5180/5182 and UDP 5181.",
+                    "Firewall setup was canceled. Allow TCP 5180/5182 and UDP 5181 through the firewall on this network.",
                 FirewallResult.Failed =>
-                    "Firewall setup failed. Set Wi-Fi to Private and allow TCP 5180/5182 and UDP 5181.",
+                    "Firewall setup failed. Allow TCP 5180/5182 and UDP 5181 through the firewall on this network.",
                 FirewallResult.NoActiveFirewall =>
                     "No active UFW or firewalld detected. If pairing fails, allow TCP 5180/5182 and UDP 5181.",
                 _ =>
-                    "Automatic firewall setup is unavailable. Allow TCP 5180/5182 and UDP 5181 on the private network."
+                    "Automatic firewall setup is unavailable. Allow TCP 5180/5182 and UDP 5181 through the firewall on this network."
             };
         }
         catch (Exception exception)
@@ -57,10 +57,14 @@ internal static class FirewallSetup
         var script = """
             $ErrorActionPreference = 'Stop'
             if (-not (Get-NetFirewallRule -Name 'UniClipPrivateLanTcp' -ErrorAction SilentlyContinue)) {
-                New-NetFirewallRule -Name 'UniClipPrivateLanTcp' -DisplayName 'UniClip private LAN (TCP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Private -Protocol TCP -LocalPort 5180,5182 -RemoteAddress LocalSubnet | Out-Null
+                New-NetFirewallRule -Name 'UniClipPrivateLanTcp' -DisplayName 'UniClip local network (TCP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Any -Protocol TCP -LocalPort 5180,5182 -RemoteAddress LocalSubnet | Out-Null
+            } else {
+                Set-NetFirewallRule -Name 'UniClipPrivateLanTcp' -Profile Any -Enabled True | Out-Null
             }
             if (-not (Get-NetFirewallRule -Name 'UniClipPrivateLanUdp' -ErrorAction SilentlyContinue)) {
-                New-NetFirewallRule -Name 'UniClipPrivateLanUdp' -DisplayName 'UniClip private LAN (UDP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Private -Protocol UDP -LocalPort 5181 -RemoteAddress LocalSubnet | Out-Null
+                New-NetFirewallRule -Name 'UniClipPrivateLanUdp' -DisplayName 'UniClip local network (UDP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Any -Protocol UDP -LocalPort 5181 -RemoteAddress LocalSubnet | Out-Null
+            } else {
+                Set-NetFirewallRule -Name 'UniClipPrivateLanUdp' -Profile Any -Enabled True | Out-Null
             }
             """;
         var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
@@ -248,7 +252,7 @@ internal static class FirewallSetup
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var root = string.IsNullOrWhiteSpace(appData) ? Path.GetTempPath() : appData;
-        return Path.Combine(root, "UniClip", "firewall-v1.configured");
+        return Path.Combine(root, "UniClip", "firewall-v2.configured");
     }
 
     private static string Quote(string value) => $"'{value.Replace("'", "'\\''", StringComparison.Ordinal)}'";

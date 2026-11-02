@@ -21,17 +21,17 @@ on the other device, and select **Pair using PIN**. Both PCs must be on the
 same local network. The apps discover each other automatically; no server URL
 or separate service setup is needed.
 
-On first launch, UniClip asks for administrator approval to add persistent,
-private-LAN-only firewall rules for TCP ports 5180 and 5182 and UDP port 5181
-(on Linux, when UFW or firewalld is active).
-On Windows, set the Wi-Fi network profile to Private; the rules do not open
-these ports on Public networks.
-Port 5180 exchanges PINs, 5181 discovers devices, and 5182 carries the direct
-peer connection. Windows rules are limited to the Private profile and local
-subnets. On Linux, UFW or firewalld rules are limited to private and link-local
-source addresses. If automatic setup is unavailable or declined, add those
-same inbound rules manually. Use a regular private Wi-Fi network, not a guest
-network, and ensure the router does not have wireless/client isolation enabled.
+On first launch, UniClip asks for administrator approval to add persistent
+firewall rules for TCP ports 5180 and 5182 and UDP port 5181 (on Linux, when
+UFW or firewalld is active). Port 5180 exchanges PINs, 5181 discovers devices,
+and 5182 carries the direct peer connection. Windows rules apply to all
+firewall profiles, including Public, but are restricted to the directly
+connected local subnet. Linux UFW and firewalld rules are restricted to private
+and link-local source addresses. This lets two devices on a public Wi-Fi
+hotspot pair, but does not allow access from the wider internet. Public
+networks can include untrusted devices on the same subnet, so only share PINs
+with devices you trust. If automatic setup is unavailable or declined, add the
+same inbound rules manually. Router client isolation can still prevent pairing.
 The PIN expires after ten minutes and can be claimed only once. Generate a new
 PIN after an unsuccessful connection.
 
@@ -55,7 +55,7 @@ the HTTP rendezvous request contains the peer invite. Use a properly configured
 HTTPS reverse proxy if exposing the service beyond a trusted LAN. This does
 not add cross-network connectivity; relay support is not implemented. The host
 device may also need to allow UniClip's peer-to-peer listener through its
-private-network firewall.
+firewall on the current network.
 
 The default solution builds the shared app and desktop host without platform
 workloads:

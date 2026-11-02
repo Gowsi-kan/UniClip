@@ -108,7 +108,7 @@ public static class RendezvousPairingClient
         if (!reachedServer)
         {
             throw new InvalidOperationException(
-                "UniClip found another device, but could not contact its PIN server. Allow UniClip through the private-network firewall for TCP port 5180 on the PC showing the PIN.");
+                "UniClip found another device, but could not contact its PIN server. Allow UniClip through the firewall on the PC showing the PIN for the current network and TCP port 5180.");
         }
 
         throw new InvalidOperationException(

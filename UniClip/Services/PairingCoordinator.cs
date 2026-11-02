@@ -74,7 +74,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
         catch (Exception exception)
         {
             throw new InvalidOperationException(
-                $"The PIN was accepted, but the direct device connection failed. Allow UniClip through the private-network firewall on both PCs, make sure the Wi-Fi does not isolate devices, and create a new PIN because this one has been used. Connection details: {exception.Message}",
+                $"The PIN was accepted, but the direct device connection failed. Allow UniClip through the firewall on both PCs for the current network, make sure the Wi-Fi does not isolate devices, and create a new PIN because this one has been used. Connection details: {exception.Message}",
                 exception);
         }
 
