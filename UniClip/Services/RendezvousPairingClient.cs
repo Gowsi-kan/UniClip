@@ -58,10 +58,11 @@ public static class RendezvousPairingClient
         if (servers.Count == 0)
         {
             throw new InvalidOperationException(
-                "No UniClip PIN server was found. Put both PCs on the same non-guest Wi-Fi, set the Windows network profile to Private, and allow inbound UDP port 5181 through the firewall on both PCs. Check that the router does not isolate wireless clients.");
+                "No UniClip PIN server was found. Put both PCs on the same Wi-Fi network and allow inbound UDP port 5181 through the firewall on both PCs. Public Wi-Fi may block device-to-device traffic; check for client isolation.");
         }
 
         var reachedServer = false;
+        var connectionErrors = new List<string>();
         foreach (var server in servers)
         {
             HttpResponseMessage response;
@@ -72,12 +73,14 @@ public static class RendezvousPairingClient
                     content: null,
                     cancellationToken);
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException exception)
             {
+                connectionErrors.Add($"{server}: {exception.Message}");
                 continue;
             }
             catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
+                connectionErrors.Add($"{server}: connection timed out.");
                 continue;
             }
 
@@ -108,7 +111,7 @@ public static class RendezvousPairingClient
         if (!reachedServer)
         {
             throw new InvalidOperationException(
-                "UniClip found another device, but could not contact its PIN server. Allow UniClip through the firewall on the PC showing the PIN for the current network and TCP port 5180.");
+                $"UniClip found another device, but could not contact its PIN server on TCP port 5180. Allow inbound TCP 5180 on the PC showing the PIN. Connection details: {string.Join("; ", connectionErrors)}");
         }
 
         throw new InvalidOperationException(

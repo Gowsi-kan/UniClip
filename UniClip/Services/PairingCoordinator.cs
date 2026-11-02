@@ -63,13 +63,21 @@ public sealed class PairingCoordinator : IAsyncDisposable
 
         var addresses = invite.Addresses.Select(Multiaddress.Decode).ToArray();
         ISession session;
+        using var connectionTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        connectionTimeout.CancelAfter(TimeSpan.FromSeconds(20));
         try
         {
-            session = await peer.DialAsync(addresses, cancellationToken);
+            session = await peer.DialAsync(addresses, connectionTimeout.Token);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
+        }
+        catch (OperationCanceledException exception)
+        {
+            throw new InvalidOperationException(
+                "The PIN was accepted, but the direct device connection timed out after 20 seconds. Check that both devices are on the same Wi-Fi and that the network allows devices to communicate with each other. Create a new PIN before trying again.",
+                exception);
         }
         catch (Exception exception)
         {

@@ -13,52 +13,68 @@ public sealed class LanDiscoveryService(ILogger<LanDiscoveryService> logger) : I
     public const string DiscoveryResponse = "UNICLIP_RENDEZVOUS_V1";
 
     private CancellationTokenSource? _stopping;
+    private UdpClient? _listener;
     private Task? _listenerTask;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = new CancellationTokenSource();
-        _listenerTask = Task.Run(() => Listen(_stopping.Token), CancellationToken.None);
+        _listener = new UdpClient(new IPEndPoint(IPAddress.Any, Port));
+        logger.LogInformation("LAN pairing discovery listening on UDP port {Port}", Port);
+        _listenerTask = ListenAsync(_listener, _stopping.Token);
         return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _stopping?.Cancel();
-        if (_listenerTask is not null)
+        try
         {
-            await _listenerTask.WaitAsync(cancellationToken);
+            if (_listenerTask is not null)
+            {
+                await _listenerTask.WaitAsync(cancellationToken);
+            }
         }
+        catch (OperationCanceledException) when (_stopping?.IsCancellationRequested == true)
+        {
+        }
+        finally
+        {
+            _listener?.Dispose();
+        }
+
+        logger.LogInformation("LAN pairing discovery stopped.");
     }
 
     public void Dispose()
     {
         _stopping?.Cancel();
+        _listener?.Dispose();
         _stopping?.Dispose();
     }
 
-    private void Listen(CancellationToken stoppingToken)
+    private async Task ListenAsync(UdpClient listener, CancellationToken stoppingToken)
     {
-        using var listener = new UdpClient(new IPEndPoint(IPAddress.Any, Port));
         var requestBytes = Encoding.ASCII.GetBytes(DiscoveryRequest);
         var responseBytes = Encoding.ASCII.GetBytes(DiscoveryResponse);
 
-        logger.LogInformation("LAN pairing discovery listening on UDP port {Port}", Port);
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            if (!listener.Client.Poll(100_000, SelectMode.SelectRead))
+            while (!stoppingToken.IsCancellationRequested)
             {
-                continue;
-            }
-
-            var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-            var request = listener.Receive(ref remoteEndPoint);
-            if (request.AsSpan().SequenceEqual(requestBytes))
-            {
-                listener.Send(responseBytes, responseBytes.Length, remoteEndPoint);
+                var datagram = await listener.ReceiveAsync(stoppingToken);
+                if (datagram.Buffer.AsSpan().SequenceEqual(requestBytes))
+                {
+                    await listener.SendAsync(responseBytes, datagram.RemoteEndPoint, stoppingToken);
+                }
             }
         }
-
-        logger.LogInformation("LAN pairing discovery stopped.");
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "LAN pairing discovery listener failed.");
+        }
     }
 }
