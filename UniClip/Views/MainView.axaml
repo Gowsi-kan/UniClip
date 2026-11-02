@@ -14,10 +14,7 @@
         <Grid Margin="28,20,28,16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel Orientation="Horizontal" Spacing="11">
-                    <Border Width="38" Height="38" CornerRadius="13" Background="#B8F36B">
-                        <TextBlock Text="u" Foreground="#14200D" FontSize="24" FontWeight="Bold"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
+                    <Image Source="/Assets/Icon.png" Width="38" Height="38" />
                     <StackPanel VerticalAlignment="Center" Spacing="1">
                         <TextBlock Text="UniClip" Foreground="#F1F5EF" FontSize="20"
                             FontWeight="SemiBold" />

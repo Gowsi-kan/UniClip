@@ -14,7 +14,7 @@
     MinHeight="700"
     d:DesignHeight="760"
     d:DesignWidth="1160"
-    Icon="/Assets/avalonia-logo.ico"
+    Icon="/Assets/UniClipIcon.ico"
     mc:Ignorable="d">
     <Grid x:Name="RootLayout" RowDefinitions="0,*">
         <Border
