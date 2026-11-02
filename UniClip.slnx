@@ -1,11 +1,3 @@
 ﻿<Solution>
-  <Project Path="UniClip.Android/UniClip.Android.csproj">
-    <Deploy />
-  </Project>
-  <Project Path="UniClip.Browser/UniClip.Browser.csproj" />
   <Project Path="UniClip.Desktop/UniClip.Desktop.csproj" />
-  <Project Path="UniClip.iOS/UniClip.iOS.csproj">
-    <Deploy />
-  </Project>
-  <Project Path="UniClip/UniClip.csproj" />
 </Solution>

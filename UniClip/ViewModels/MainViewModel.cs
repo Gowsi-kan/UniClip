@@ -336,9 +336,9 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
 
             ShowClipboardPreview(text);
             _lastObservedClipboardText = text;
-            if (System.Text.Encoding.UTF8.GetByteCount(text) > ClipboardSyncProtocol.MaximumTextBytes)
+            if (System.Text.Encoding.UTF8.GetByteCount(text) > ClipboardSyncLimits.MaximumTextBytes)
             {
-                ClipboardSyncStatus = $"Clipboard text exceeds the {ClipboardSyncProtocol.MaximumTextBytes / 1024} KiB sync limit.";
+                ClipboardSyncStatus = $"Clipboard text exceeds the {ClipboardSyncLimits.MaximumTextBytes / 1024} KiB sync limit.";
                 return;
             }
 

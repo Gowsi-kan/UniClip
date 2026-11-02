@@ -10,7 +10,7 @@ namespace UniClip.Services;
 
 public sealed class ClipboardSyncProtocol : ISessionProtocol<string, bool>
 {
-    public const int MaximumTextBytes = 256 * 1024;
+    public const int MaximumTextBytes = ClipboardSyncLimits.MaximumTextBytes;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     public const string ProtocolId = "/unclip/clipboard-sync/1.0.0";

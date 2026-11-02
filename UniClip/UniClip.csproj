@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net10.0;net10.0-browser</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -18,7 +18,14 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="Nethermind.Libp2p" />
+    <PackageReference Include="Nethermind.Libp2p" Condition="'$(TargetFramework)' != 'net10.0-browser'" />
     <PackageReference Include="QRCoder" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-browser'">
+    <Compile Remove="Services/ClipboardSyncProtocol.cs;Services/FileTransferProtocol.cs;Services/PairingCoordinator.cs;Services/PairingInvite.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net10.0-browser'">
+    <Compile Remove="Services/PairingCoordinator.BrowserPreview.cs" />
   </ItemGroup>
 </Project>

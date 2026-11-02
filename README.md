@@ -1,7 +1,8 @@
 # UniClip
 
 UniClip is a .NET 10 Avalonia app for moving clipboard text and files between
-Windows, Linux, Android, and iOS devices.
+desktop devices. Run the app on a Windows or Linux laptop to pair with other
+instances.
 
 ## Run the desktop app
 
@@ -9,8 +10,24 @@ Windows, Linux, Android, and iOS devices.
 dotnet run --project UniClip.Desktop
 ```
 
-The solution also contains Android, iOS, and browser front ends. Building those
-targets requires the corresponding .NET workloads and platform tooling.
+The default solution builds the shared app and desktop host without platform
+workloads:
+
+```sh
+dotnet build
+```
+
+The browser front end remains an optional project outside the default solution
+and requires the WebAssembly .NET workload to build. Install it once, then run
+the preview with:
+
+```sh
+dotnet workload install wasm-tools
+dotnet run --project UniClip.Browser
+```
+
+The browser preview does not support device pairing or file and clipboard
+transfers.
 
 ## Current status
 
@@ -19,8 +36,7 @@ advertise it over mDNS, and connect to a pasted invite. The libp2p stack
 authenticates peers with its Noise handshake (X25519) before reporting a
 connection. Files are streamed in bounded 64 KiB chunks over that encrypted
 session, checked with SHA-256, and saved without overwriting existing files.
-The receiver must approve each incoming file. iOS local-network and Bonjour
-usage descriptions are included.
+The receiver must approve each incoming file.
 
 Invites contain reachable local addresses and a peer identity. The receiver
 can scan the QR with a QR reader and paste its payload into the invite field.
@@ -41,15 +57,11 @@ has not received an independent security review.
 Received files are stored in `~/Downloads` when that folder exists; otherwise
 they go to the app's local application-data folder under `UniClip/Received`.
 
-The .NET libp2p package supports Noise and mDNS; its own sample notes that iOS
-has not been tested. Desktop and browser targets are validated here, but the
-mobile targets still need builds and device testing with their platform
-workloads.
+The .NET libp2p package supports Noise and mDNS. The desktop target is the
+supported way to run UniClip on a Windows or Linux laptop.
 
 ## Project layout
 
 - `UniClip/` - shared Avalonia UI and view models.
 - `UniClip.Desktop/` - Windows, Linux, and macOS desktop host.
-- `UniClip.Android/` - Android host.
-- `UniClip.iOS/` - iOS host.
 - `UniClip.Browser/` - optional WebAssembly preview host.
