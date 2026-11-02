@@ -219,18 +219,24 @@ public static class RendezvousPairingClient
 
     private static IReadOnlyCollection<IPAddress> GetDiscoveryTargets()
     {
-        var targets = new HashSet<IPAddress> { IPAddress.Broadcast };
-        foreach (var network in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (network.OperationalStatus != OperationalStatus.Up)
-            {
-                continue;
-            }
+        var networks = NetworkInterface.GetAllNetworkInterfaces()
+            .Where(network => network.OperationalStatus == OperationalStatus.Up)
+            .Select(network => network.GetIPProperties())
+            .ToArray();
+        var localAddresses = networks
+            .SelectMany(properties => properties.UnicastAddresses)
+            .Select(unicast => unicast.Address)
+            .ToHashSet();
+        var targets = new HashSet<IPAddress>();
 
-            foreach (var address in network.GetIPProperties().UnicastAddresses)
+        foreach (var properties in networks)
+        {
+            foreach (var address in properties.UnicastAddresses)
             {
                 if (address.Address.AddressFamily != AddressFamily.InterNetwork ||
-                    address.IPv4Mask is null)
+                    address.IPv4Mask is null ||
+                    IPAddress.IsLoopback(address.Address) ||
+                    !IsPrivateLanAddress(address.Address))
                 {
                     continue;
                 }
@@ -241,9 +247,6 @@ public static class RendezvousPairingClient
                 var maskValue = BinaryPrimitives.ReadUInt32BigEndian(maskBytes);
                 var networkValue = addressValue & maskValue;
                 var broadcastValue = networkValue | ~maskValue;
-                var broadcastBytes = new byte[sizeof(uint)];
-                BinaryPrimitives.WriteUInt32BigEndian(broadcastBytes, broadcastValue);
-                targets.Add(new IPAddress(broadcastBytes));
 
                 var addressCount = broadcastValue - networkValue;
                 var hostCount = addressCount > 1 ? addressCount - 1 : 0;
@@ -262,7 +265,7 @@ public static class RendezvousPairingClient
                     var candidateBytes = new byte[sizeof(uint)];
                     BinaryPrimitives.WriteUInt32BigEndian(candidateBytes, candidate);
                     var candidateAddress = new IPAddress(candidateBytes);
-                    if (IsPrivateLanAddress(candidateAddress))
+                    if (IsPrivateLanAddress(candidateAddress) && !localAddresses.Contains(candidateAddress))
                     {
                         targets.Add(candidateAddress);
                     }
