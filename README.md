@@ -49,6 +49,15 @@ To run the rendezvous service separately:
 dotnet run --project UniClip.Rendezvous -- --urls http://0.0.0.0:5180
 ```
 
+For temporary pairing diagnostics, each desktop app launch writes a separate
+session log under `logs/` beside the application executable. Logs include
+discovery targets and responses, rendezvous status codes, connection addresses,
+and failures. PINs, pairing invites, clipboard text, and file contents are
+redacted or not recorded. Network addresses and peer connection addresses are
+included, so review the file before sharing it. This temporary logging can be
+disabled by setting `SessionDiagnostics.Enabled` to `false` in
+`UniClip/Services/SessionDiagnostics.cs` after troubleshooting is complete.
+
 Treat the PIN like a temporary password: anyone who claims it can retrieve the
 invite, so share it only with the device you intend to pair.
 

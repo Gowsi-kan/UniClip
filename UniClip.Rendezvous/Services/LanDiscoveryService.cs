@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -66,12 +65,19 @@ public sealed class LanDiscoveryService(ILogger<LanDiscoveryService> logger) : I
                 var datagram = await listener.ReceiveAsync(stoppingToken);
                 if (datagram.Buffer.AsSpan().SequenceEqual(requestBytes))
                 {
-                    await listener.SendAsync(responseBytes, datagram.RemoteEndPoint, stoppingToken);
-                    Debug.WriteLine("Received LAN discovery request from {RemoteEndPoint} and sent response");
+                    var sent = await listener.SendAsync(responseBytes, datagram.RemoteEndPoint, stoppingToken);
+                    logger.LogInformation(
+                        "Received LAN discovery request from {RemoteEndPoint} ({RequestBytes} bytes); sent {ResponseBytes} response bytes",
+                        datagram.RemoteEndPoint,
+                        datagram.Buffer.Length,
+                        sent);
                 }
                 else
                 {
-                    Debug.WriteLine("Ignored unrecognized LAN discovery datagram from {RemoteEndPoint} ({Length} bytes)");
+                    logger.LogDebug(
+                        "Ignored unrecognized LAN discovery datagram from {RemoteEndPoint} ({Length} bytes)",
+                        datagram.RemoteEndPoint,
+                        datagram.Buffer.Length);
                 }
             }
         }

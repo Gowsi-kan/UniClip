@@ -31,10 +31,12 @@ public static class RendezvousPairingClient
         CancellationToken cancellationToken = default)
     {
         var uri = new Uri("http://127.0.0.1:5180/api/pairings/");
+        SessionDiagnostics.Write("Pairing", "Registering an invite with the local rendezvous service; invite contents omitted.");
         using var response = await Client.PostAsJsonAsync(
             uri,
             new CreatePairingRequest(invite),
             cancellationToken);
+        SessionDiagnostics.Write("Pairing", $"Local rendezvous registration returned HTTP {(int)response.StatusCode} ({response.StatusCode}).");
 
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {
@@ -49,6 +51,7 @@ public static class RendezvousPairingClient
             throw new InvalidOperationException("The PIN server returned an invalid pairing code.");
         }
 
+        SessionDiagnostics.Write("Pairing", "Local rendezvous registration succeeded; PIN value omitted.");
         return result.Pin;
     }
 
@@ -57,17 +60,21 @@ public static class RendezvousPairingClient
         CancellationToken cancellationToken = default)
     {
         var normalizedPin = PairingPin.Normalize(pin);
+        SessionDiagnostics.Write("Pairing", "PIN claim started; PIN value omitted.");
         var servers = await DiscoverServersAsync(cancellationToken);
         if (servers.Count == 0)
         {
+            SessionDiagnostics.Write("Pairing", "PIN claim stopped because LAN discovery found no remote servers.");
             throw new InvalidOperationException(
                 "No UniClip PIN server was found. Put both PCs on the same Wi-Fi network and allow inbound UDP port 5181 through the firewall on both PCs. Public Wi-Fi may block device-to-device traffic; check for client isolation.");
         }
 
+        SessionDiagnostics.Write("Pairing", $"LAN discovery found {servers.Count} remote server(s): {string.Join(", ", servers)}.");
         var reachedServer = false;
         var connectionErrors = new List<string>();
         foreach (var server in servers)
         {
+            SessionDiagnostics.Write("Pairing", $"Claiming PIN from {server}:5180; PIN value omitted.");
             HttpResponseMessage response;
             try
             {
@@ -78,16 +85,19 @@ public static class RendezvousPairingClient
             }
             catch (HttpRequestException exception)
             {
+                SessionDiagnostics.Write("Pairing", $"HTTP claim request to {server}:5180 failed.", exception);
                 connectionErrors.Add($"{server}: {exception.Message}");
                 continue;
             }
-            catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+            catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
             {
+                SessionDiagnostics.Write("Pairing", $"HTTP claim request to {server}:5180 timed out.", exception);
                 connectionErrors.Add($"{server}: connection timed out.");
                 continue;
             }
 
             reachedServer = true;
+            SessionDiagnostics.Write("Pairing", $"HTTP claim response from {server}:5180: {(int)response.StatusCode} ({response.StatusCode}).");
             using (response)
             {
                 if (response.StatusCode == HttpStatusCode.NotFound)
@@ -107,16 +117,19 @@ public static class RendezvousPairingClient
                     throw new InvalidOperationException("The PIN server returned an empty pairing invite.");
                 }
 
+                SessionDiagnostics.Write("Pairing", $"PIN claim succeeded at {server}; invite contents omitted.");
                 return result.Invite;
             }
         }
 
         if (!reachedServer)
         {
+            SessionDiagnostics.Write("Pairing", "LAN discovery succeeded, but no HTTP PIN server was reachable on TCP port 5180.");
             throw new InvalidOperationException(
                 $"UniClip found another device, but could not contact its PIN server on TCP port 5180. Allow inbound TCP 5180 on the PC showing the PIN. Connection details: {string.Join("; ", connectionErrors)}");
         }
 
+        SessionDiagnostics.Write("Pairing", "No discovered server accepted the PIN; it may be invalid, expired, or already claimed.");
         throw new InvalidOperationException(
             "The PIN was not found, has expired, or was already used. Generate a new PIN on the other PC and try again.");
     }
@@ -127,17 +140,20 @@ public static class RendezvousPairingClient
         const string Tag = "[Discovery]";
         var sw = Stopwatch.StartNew();
 
+        SessionDiagnostics.Write(Tag, "Opening IPv4 UDP discovery socket.");
         using var socket = new UdpClient(AddressFamily.InterNetwork)
         {
             EnableBroadcast = true
         };
         socket.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
-        Debug.WriteLine($"{Tag} Socket bound to {socket.Client.LocalEndPoint}, broadcast={socket.EnableBroadcast}");
+        SessionDiagnostics.Write(Tag, $"Socket bound to {socket.Client.LocalEndPoint}, broadcast={socket.EnableBroadcast}.");
 
         var request = Encoding.ASCII.GetBytes(DiscoveryRequest);
         var targets = GetDiscoveryTargets().ToArray();
-        Debug.WriteLine($"{Tag} Request=\"{DiscoveryRequest}\" ({request.Length} bytes), port={DiscoveryPort}, targets={targets.Length}");
+        SessionDiagnostics.Write(Tag, $"Request={DiscoveryRequest} ({request.Length} bytes), port={DiscoveryPort}, target count={targets.Length}, targets=[{string.Join(", ", targets)}].");
 
+        var sentTargets = 0;
+        var sentBytes = 0;
         foreach (var target in targets)
         {
             try
@@ -146,18 +162,20 @@ public static class RendezvousPairingClient
                     request,
                     new IPEndPoint(target, DiscoveryPort),
                     cancellationToken);
-                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Sent {sent} bytes -> {target}:{DiscoveryPort}");
+                sentTargets++;
+                sentBytes += sent;
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Send FAILED -> {target}: {ex.GetType().Name}: {ex.Message}");
+                SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Send failed -> {target}:{DiscoveryPort}.", ex);
                 throw;
             }
         }
 
+        SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Sent {sentBytes} total bytes to {sentTargets}/{targets.Length} targets.");
         using var discoveryTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         discoveryTimeout.CancelAfter(TimeSpan.FromSeconds(2));
-        Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Waiting for responses (2 s window)...");
+        SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Waiting for responses (2 second window).");
 
         var servers = new HashSet<IPAddress>();
         var responseBytes = Encoding.ASCII.GetBytes(DiscoveryResponse);
@@ -171,49 +189,46 @@ public static class RendezvousPairingClient
                 received++;
                 var remote = response.RemoteEndPoint;
                 var matches = response.Buffer.AsSpan().SequenceEqual(responseBytes);
-                var isLocal = IsLocalAddress(remote.Address);
 
-                Debug.WriteLine(
-                    $"{Tag} [{sw.ElapsedMilliseconds} ms] RX #{received} from {remote}, {response.Buffer.Length} bytes, match={matches}, local={isLocal}");
+                SessionDiagnostics.Write(
+                    Tag,
+                    $"[{sw.ElapsedMilliseconds} ms] RX #{received} from {remote}, {response.Buffer.Length} bytes, expected response={matches}.");
 
                 if (!matches)
                 {
                     var preview = response.Buffer.AsSpan(0, Math.Min(response.Buffer.Length, 64));
-                    Debug.WriteLine($"{Tag}   mismatch payload hex={Convert.ToHexString(preview)} ascii=\"{Encoding.ASCII.GetString(preview)}\"");
-                }
-                else if (isLocal)
-                {
-                    Debug.WriteLine($"{Tag}   ignored (own address)");
+                    SessionDiagnostics.Write(Tag, $"Unexpected response preview hex={Convert.ToHexString(preview)} ascii=\"{Encoding.ASCII.GetString(preview)}\".");
                 }
                 else if (servers.Add(remote.Address))
                 {
-                    Debug.WriteLine($"{Tag}   server added: {remote.Address}");
+                    SessionDiagnostics.Write(Tag, $"Remote server added: {remote.Address}.");
                 }
                 else
                 {
-                    Debug.WriteLine($"{Tag}   duplicate: {remote.Address}");
+                    SessionDiagnostics.Write(Tag, $"Duplicate response from {remote.Address}.");
                 }
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
-                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Discovery window elapsed");
+                SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Discovery window elapsed.");
                 break;
             }
             catch (SocketException ex)
             {
-                Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Receive SocketException {ex.SocketErrorCode} ({ex.ErrorCode}): {ex.Message}");
+                SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Receive socket exception {ex.SocketErrorCode} ({ex.ErrorCode}).", ex);
                 throw;
             }
         }
 
         if (cancellationToken.IsCancellationRequested)
         {
-            Debug.WriteLine($"{Tag} [{sw.ElapsedMilliseconds} ms] Cancelled by caller");
+            SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Cancelled by caller.");
         }
         cancellationToken.ThrowIfCancellationRequested();
 
-        Debug.WriteLine(
-            $"{Tag} Done in {sw.ElapsedMilliseconds} ms: {received} packets, {servers.Count} server(s): [{string.Join(", ", servers)}]");
+        SessionDiagnostics.Write(
+            Tag,
+            $"Done in {sw.ElapsedMilliseconds} ms: {received} packets, {servers.Count} server(s): [{string.Join(", ", servers)}].");
         return servers.ToArray();
     }
 
@@ -223,6 +238,16 @@ public static class RendezvousPairingClient
             .Where(network => network.OperationalStatus == OperationalStatus.Up)
             .Select(network => network.GetIPProperties())
             .ToArray();
+        foreach (var address in networks.SelectMany(properties => properties.UnicastAddresses))
+        {
+            if (address.Address.AddressFamily == AddressFamily.InterNetwork)
+            {
+                SessionDiagnostics.Write(
+                    "Discovery",
+                    $"Active IPv4 address {address.Address} with mask {address.IPv4Mask?.ToString() ?? "unknown"}.");
+            }
+        }
+
         var localAddresses = networks
             .SelectMany(properties => properties.UnicastAddresses)
             .Select(unicast => unicast.Address)
@@ -252,6 +277,9 @@ public static class RendezvousPairingClient
                 var hostCount = addressCount > 1 ? addressCount - 1 : 0;
                 if (hostCount is 0 or > MaximumUnicastProbeHosts)
                 {
+                    SessionDiagnostics.Write(
+                        "Discovery",
+                        $"Skipping subnet {address.Address}/{address.IPv4Mask}: {hostCount} candidate hosts exceeds probe limit {MaximumUnicastProbeHosts}.");
                     continue;
                 }
 
@@ -275,12 +303,6 @@ public static class RendezvousPairingClient
 
         return targets;
     }
-
-    private static bool IsLocalAddress(IPAddress address) =>
-        IPAddress.IsLoopback(address) ||
-        NetworkInterface.GetAllNetworkInterfaces()
-            .SelectMany(network => network.GetIPProperties().UnicastAddresses)
-            .Any(unicast => unicast.Address.Equals(address));
 
     private static bool IsPrivateLanAddress(IPAddress address)
     {

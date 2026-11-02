@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Logging;
 using UniClip.Rendezvous.Contracts;
 using UniClip.Rendezvous.Services;
 
@@ -36,11 +37,14 @@ public static class PairingEndpoints
     private static Results<Created<CreatePairingResponse>, Conflict<ProblemDetails>> Create(
         CreatePairingRequest request,
         IPairingStore pairingStore,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
+        var logger = loggerFactory.CreateLogger("UniClip.Rendezvous.Endpoints.PairingEndpoints");
         cancellationToken.ThrowIfCancellationRequested();
         if (string.IsNullOrWhiteSpace(request.Invite))
         {
+            logger.LogWarning("Rejected pairing registration because the invite was empty.");
             return TypedResults.Conflict(new ProblemDetails
             {
                 Title = "Pairing could not be created",
@@ -50,6 +54,7 @@ public static class PairingEndpoints
 
         if (!pairingStore.TryCreate(request.Invite, out var pin, out var expiresAt))
         {
+            logger.LogWarning("Could not allocate a unique temporary pairing PIN.");
             return TypedResults.Conflict(new ProblemDetails
             {
                 Title = "Pairing could not be created",
@@ -58,16 +63,23 @@ public static class PairingEndpoints
         }
 
         var response = new CreatePairingResponse(pin, expiresAt);
+        logger.LogInformation("Created a temporary pairing entry expiring at {ExpiresAt}; PIN and invite omitted.", expiresAt);
         return TypedResults.Created($"/api/pairings/{pin}/claim", response);
     }
 
     private static Results<Ok<ClaimPairingResponse>, NotFound<ProblemDetails>> Claim(
         string pin,
-        IPairingStore pairingStore)
+        IPairingStore pairingStore,
+        ILoggerFactory loggerFactory,
+        HttpContext httpContext)
     {
+        var logger = loggerFactory.CreateLogger("UniClip.Rendezvous.Endpoints.PairingEndpoints");
         if (pin.Length != 6 || pin.Any(character => character is < '0' or > '9') ||
             !pairingStore.TryClaim(pin, out var invite))
         {
+            logger.LogInformation(
+                "Rejected an invalid, expired, or previously claimed pairing PIN from {RemoteAddress}; PIN omitted.",
+                httpContext.Connection.RemoteIpAddress);
             return TypedResults.NotFound(new ProblemDetails
             {
                 Title = "PIN not found",
@@ -75,6 +87,9 @@ public static class PairingEndpoints
             });
         }
 
+        logger.LogInformation(
+            "Claimed a temporary pairing invite from {RemoteAddress}; PIN and invite omitted.",
+            httpContext.Connection.RemoteIpAddress);
         return TypedResults.Ok(new ClaimPairingResponse(invite));
     }
 }

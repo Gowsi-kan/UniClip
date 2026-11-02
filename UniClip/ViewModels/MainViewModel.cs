@@ -113,10 +113,12 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     {
         if (_pairingInitialized || !CanPair)
         {
+            SessionDiagnostics.Write("Pairing", $"Pairing initialization skipped. Already initialized={_pairingInitialized}; can pair={CanPair}.");
             return;
         }
 
         _pairingInitialized = true;
+        SessionDiagnostics.Write("Pairing", "Initializing pairing and creating this session's temporary PIN.");
         await CreatePairingCodeAsync();
     }
 
@@ -204,6 +206,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         IsPairingBusy = true;
         CanPair = false;
         PairingStatus = "Starting a secure listener…";
+        SessionDiagnostics.Write("Pairing", "Creating a new temporary pairing PIN.");
         try
         {
             var invite = await _pairingCoordinator.CreateInviteAsync(CancellationToken.None);
@@ -215,9 +218,11 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
             PairingStatus = PairingServerStartupStatus.FirewallWarning is { } firewallWarning
                 ? $"PIN ready · enter it within 10 minutes. {firewallWarning}"
                 : "PIN ready · enter it on the other device within 10 minutes.";
+            SessionDiagnostics.Write("Pairing", "Temporary PIN created and displayed; PIN value omitted.");
         }
         catch (Exception exception)
         {
+            SessionDiagnostics.Write("Pairing", "Could not create a temporary pairing PIN.", exception);
             PairingStatus = $"Could not create a pairing PIN: {exception.Message}";
         }
         finally
@@ -232,6 +237,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     {
         IsPairingBusy = true;
         CanPair = false;
+        SessionDiagnostics.Write("Pairing", "User started pairing with an entered PIN; PIN value omitted.");
         try
         {
             var enteredPin = string.Concat(PinDigit1, PinDigit2, PinDigit3, PinDigit4, PinDigit5, PinDigit6);
@@ -252,9 +258,11 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
                 ? "Paired · checking for clipboard changes…"
                 : "Paired · enable sync on both devices to share text.";
             UpdateClipboardSyncTimer();
+            SessionDiagnostics.Write("Pairing", "UI pairing flow completed successfully.");
         }
         catch (Exception exception)
         {
+            SessionDiagnostics.Write("Pairing", "UI pairing flow failed.", exception);
             ConnectionStatus = $"Could not connect: {exception.Message}";
         }
         finally

@@ -1,5 +1,6 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Logging;
 using UniClip.Rendezvous.Endpoints;
 using UniClip.Rendezvous.Services;
 
@@ -13,9 +14,16 @@ public static class Program
 
 public static class RendezvousHost
 {
-    public static WebApplication CreateApplication(string[]? args = null)
+    public static WebApplication CreateApplication(
+        string[]? args = null,
+        ILoggerProvider? loggerProvider = null)
     {
         var builder = WebApplication.CreateBuilder(args ?? []);
+        if (loggerProvider is not null)
+        {
+            builder.Logging.AddProvider(loggerProvider);
+        }
+
         builder.Services.AddOpenApi();
         builder.Services.AddProblemDetails();
         builder.Services.AddValidation();

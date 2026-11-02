@@ -42,7 +42,9 @@ public sealed class PairingCoordinator : IAsyncDisposable
         await EnsureStartedAsync(cancellationToken);
 
         var peer = _localPeer ?? throw new InvalidOperationException("The local peer is not available.");
-        return PairingInvite.Create(peer.Identity.PeerId, GetInviteAddresses(peer));
+        var addresses = GetInviteAddresses(peer).ToArray();
+        SessionDiagnostics.Write("Peer", $"Creating local invite for {addresses.Length} advertised address(es): {string.Join(", ", addresses)}.");
+        return PairingInvite.Create(peer.Identity.PeerId, addresses);
     }
 
     public async Task<string> CreatePairingCodeAsync(
@@ -62,6 +64,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
         var peer = _localPeer ?? throw new InvalidOperationException("The local peer is not available.");
 
         var addresses = invite.Addresses.Select(Multiaddress.Decode).ToArray();
+        SessionDiagnostics.Write("Peer", $"Starting direct peer connection to {addresses.Length} invite address(es): {string.Join(", ", invite.Addresses)}.");
         ISession session;
         using var connectionTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         connectionTimeout.CancelAfter(TimeSpan.FromSeconds(20));
@@ -71,16 +74,19 @@ public sealed class PairingCoordinator : IAsyncDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            SessionDiagnostics.Write("Peer", "Direct peer connection was cancelled by the caller.");
             throw;
         }
         catch (OperationCanceledException exception)
         {
+            SessionDiagnostics.Write("Peer", "Direct peer connection timed out after 20 seconds.", exception);
             throw new InvalidOperationException(
                 "The PIN was accepted, but the direct device connection timed out after 20 seconds. Check that both devices are on the same Wi-Fi and that the network allows devices to communicate with each other. Create a new PIN before trying again.",
                 exception);
         }
         catch (Exception exception)
         {
+            SessionDiagnostics.Write("Peer", "Direct peer connection failed.", exception);
             throw new InvalidOperationException(
                 $"The PIN was accepted, but the direct device connection failed. Allow UniClip through the firewall on both PCs for the current network, make sure the Wi-Fi does not isolate devices, and create a new PIN because this one has been used. Connection details: {exception.Message}",
                 exception);
@@ -88,6 +94,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
 
         if (session.RemotePeerId.ToString() != invite.PeerId)
         {
+            SessionDiagnostics.Write("Peer", "Direct connection returned a peer identity that did not match the invite.");
             await session.DisconnectAsync();
             throw new InvalidOperationException("The connected device did not match the identity in the pairing invite.");
         }
@@ -98,6 +105,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
         }
 
         _pairedSession = session;
+        SessionDiagnostics.Write("Peer", "Direct peer connection authenticated and paired successfully.");
         return invite.PeerId;
     }
 
@@ -181,17 +189,20 @@ public sealed class PairingCoordinator : IAsyncDisposable
             localPeer.OnConnected += session =>
             {
                 _pairedSession = session;
+                SessionDiagnostics.Write("Peer", $"Libp2p reported an incoming connection from peer {session.RemotePeerId}.");
                 PeerConnected?.Invoke(session.RemotePeerId.ToString());
             };
             try
             {
                 var listenAddress = Multiaddress.Decode("/ip4/0.0.0.0/tcp/5182");
+                SessionDiagnostics.Write("Peer", "Starting libp2p listener on 0.0.0.0:5182.");
                 await localPeer.StartListenAsync([listenAddress], cancellationToken);
                 if (localPeer.ListenAddresses.Count == 0)
                 {
                     throw new InvalidOperationException("No network listener could be started. Check network permissions and try again.");
                 }
 
+                SessionDiagnostics.Write("Peer", $"Libp2p listener started. Listening addresses: {string.Join(", ", localPeer.ListenAddresses)}.");
                 var discovery = serviceProvider.GetRequiredService<MDnsDiscoveryProtocol>();
                 await discovery.StartDiscoveryAsync(localPeer.ListenAddresses, cancellationToken);
                 _serviceProvider = serviceProvider;
