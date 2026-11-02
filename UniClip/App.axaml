@@ -43,29 +43,29 @@
             <Setter Property="Foreground" Value="#D6DFD3" />
         </Style>
         <Style Selector="Button.window-caption-button">
-            <Setter Property="Width" Value="46" />
+            <Setter Property="Width" Value="27" />
             <Setter Property="Height" Value="32" />
-            <Setter Property="MinWidth" Value="46" />
+            <Setter Property="MinWidth" Value="27" />
             <Setter Property="MinHeight" Value="32" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="#E8E8EC" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="CornerRadius" Value="0" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Regular" />
         </Style>
         <Style Selector="Button.window-caption-button:pointerover">
-            <Setter Property="Background" Value="#3A3B40" />
+            <Setter Property="Background" Value="#34353A" />
         </Style>
         <Style Selector="Button.window-caption-button:pressed">
             <Setter Property="Background" Value="#48494F" />
         </Style>
-        <Style Selector="Button.window-caption-button.close:pointerover">
-            <Setter Property="Background" Value="#C42B1C" />
+        <Style Selector="Button.window-caption-button.close">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
-        <Style Selector="Button.window-caption-button.close:pressed">
-            <Setter Property="Background" Value="#A82418" />
+        <Style Selector="Button.window-caption-button.close:pointerover">
+            <Setter Property="Background" Value="#34353A" />
         </Style>
     </Application.Styles>
 </Application>

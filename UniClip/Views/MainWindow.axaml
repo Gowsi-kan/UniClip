@@ -17,16 +17,23 @@
             <Grid ColumnDefinitions="138,*,138">
                 <TextBlock Grid.Column="1" Text="UniClip" Foreground="#E8E8EC" FontSize="12"
                            HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="—" Classes="window-caption-button"
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                            Margin="0,0,8,0">
+                    <Button Content="−" Classes="window-caption-button minimize"
                             chrome:WindowDecorationProperties.ElementRole="MinimizeButton"
                             Click="MinimizeWindow_OnClick" />
-                    <Button x:Name="MaximizeButton" Content="□" Classes="window-caption-button"
+                    <Button x:Name="MaximizeButton" Content="□" Classes="window-caption-button maximize"
                             chrome:WindowDecorationProperties.ElementRole="MaximizeButton"
                             Click="ToggleWindowState_OnClick" />
-                    <Button Content="×" Classes="window-caption-button close"
+                    <Button Classes="window-caption-button close"
                             chrome:WindowDecorationProperties.ElementRole="CloseButton"
-                            Click="CloseWindow_OnClick" />
+                            Click="CloseWindow_OnClick">
+                        <Border Width="16" Height="16" CornerRadius="8" Background="#168BFF">
+                            <TextBlock Text="×" Foreground="White" FontSize="11"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Margin="0,-1,0,0" />
+                        </Border>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
