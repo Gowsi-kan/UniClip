@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,6 +18,7 @@ public static class RendezvousPairingClient
     private const int DiscoveryPort = 5181;
     private const string DiscoveryRequest = "UNICLIP_DISCOVER_V1";
     private const string DiscoveryResponse = "UNICLIP_RENDEZVOUS_V1";
+    private const uint MaximumUnicastProbeHosts = 512;
 
     private static readonly HttpClient Client = new()
     {
@@ -128,7 +130,7 @@ public static class RendezvousPairingClient
         socket.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
 
         var request = Encoding.ASCII.GetBytes(DiscoveryRequest);
-        var targets = GetBroadcastAddresses().Append(IPAddress.Broadcast).Distinct();
+        var targets = GetDiscoveryTargets();
         foreach (var target in targets)
         {
             await socket.SendAsync(
@@ -162,8 +164,9 @@ public static class RendezvousPairingClient
         return servers.ToArray();
     }
 
-    private static IEnumerable<IPAddress> GetBroadcastAddresses()
+    private static IReadOnlyCollection<IPAddress> GetDiscoveryTargets()
     {
+        var targets = new HashSet<IPAddress> { IPAddress.Broadcast };
         foreach (var network in NetworkInterface.GetAllNetworkInterfaces())
         {
             if (network.OperationalStatus != OperationalStatus.Up)
@@ -181,14 +184,40 @@ public static class RendezvousPairingClient
 
                 var addressBytes = address.Address.GetAddressBytes();
                 var maskBytes = address.IPv4Mask.GetAddressBytes();
-                for (var index = 0; index < addressBytes.Length; index++)
+                var addressValue = BinaryPrimitives.ReadUInt32BigEndian(addressBytes);
+                var maskValue = BinaryPrimitives.ReadUInt32BigEndian(maskBytes);
+                var networkValue = addressValue & maskValue;
+                var broadcastValue = networkValue | ~maskValue;
+                var broadcastBytes = new byte[sizeof(uint)];
+                BinaryPrimitives.WriteUInt32BigEndian(broadcastBytes, broadcastValue);
+                targets.Add(new IPAddress(broadcastBytes));
+
+                var addressCount = broadcastValue - networkValue;
+                var hostCount = addressCount > 1 ? addressCount - 1 : 0;
+                if (hostCount is 0 or > MaximumUnicastProbeHosts)
                 {
-                    addressBytes[index] = (byte)(addressBytes[index] | ~maskBytes[index]);
+                    continue;
                 }
 
-                yield return new IPAddress(addressBytes);
+                for (var candidate = networkValue + 1; candidate < broadcastValue; candidate++)
+                {
+                    if (candidate == addressValue)
+                    {
+                        continue;
+                    }
+
+                    var candidateBytes = new byte[sizeof(uint)];
+                    BinaryPrimitives.WriteUInt32BigEndian(candidateBytes, candidate);
+                    var candidateAddress = new IPAddress(candidateBytes);
+                    if (IsPrivateLanAddress(candidateAddress))
+                    {
+                        targets.Add(candidateAddress);
+                    }
+                }
             }
         }
+
+        return targets;
     }
 
     private static bool IsLocalAddress(IPAddress address) =>
@@ -196,6 +225,15 @@ public static class RendezvousPairingClient
         NetworkInterface.GetAllNetworkInterfaces()
             .SelectMany(network => network.GetIPProperties().UnicastAddresses)
             .Any(unicast => unicast.Address.Equals(address));
+
+    private static bool IsPrivateLanAddress(IPAddress address)
+    {
+        var bytes = address.GetAddressBytes();
+        return bytes[0] == 10 ||
+               (bytes[0] == 172 && bytes[1] is >= 16 and <= 31) ||
+               (bytes[0] == 192 && bytes[1] == 168) ||
+               (bytes[0] == 169 && bytes[1] == 254);
+    }
 
     private sealed record CreatePairingRequest(string Invite);
 
