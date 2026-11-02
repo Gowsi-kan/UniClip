@@ -32,11 +32,14 @@ transfers.
 ## Current status
 
 The app can create a 10-minute QR pairing invite, start a libp2p listener,
-advertise it over mDNS, and connect to a pasted invite. The libp2p stack
-authenticates peers with its Noise handshake (X25519) before reporting a
-connection. Files are streamed in bounded 64 KiB chunks over that encrypted
-session, checked with SHA-256, and saved without overwriting existing files.
-The receiver must approve each incoming file.
+advertise it over mDNS, and connect to a pasted invite. Both devices show the
+same six-digit verification PIN after connecting; compare it to confirm that
+the intended devices paired. The PIN is a visual check, not a replacement for
+the invite or a secret credential. The libp2p stack authenticates peers with
+its Noise handshake (X25519) before reporting a connection. Files are streamed
+in bounded 64 KiB chunks over that encrypted session, checked with SHA-256,
+and saved without overwriting existing files. The receiver must approve each
+incoming file.
 
 Invites contain reachable local addresses and a peer identity. The receiver
 can scan the QR with a QR reader and paste its payload into the invite field.

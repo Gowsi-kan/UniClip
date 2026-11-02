@@ -11,6 +11,8 @@ public sealed record IncomingFileRequest(string PeerId, string FileName, long Le
 
 public sealed record PairingInvite
 {
+    public string PeerId { get; init; } = string.Empty;
+
     public string Encode() =>
         throw new NotSupportedException("Pairing and transfers are unavailable in the browser preview.");
 }

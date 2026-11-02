@@ -4,9 +4,50 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="using:UniClip.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:chrome="using:Avalonia.Controls.Chrome"
+        mc:Ignorable="d" d:DesignWidth="1160" d:DesignHeight="760"
         x:Class="UniClip.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="UniClip">
-        <views:MainView />
+        Title="UniClip"
+        Width="1160" Height="760"
+        MinWidth="1000" MinHeight="700">
+    <Grid x:Name="RootLayout" RowDefinitions="0,*">
+        <Border x:Name="TitleBar" Grid.Row="0" Background="#222328"
+                chrome:WindowDecorationProperties.ElementRole="TitleBar">
+            <Grid ColumnDefinitions="138,*,138">
+                <TextBlock Grid.Column="1" Text="UniClip" Foreground="#E8E8EC" FontSize="12"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="—" Classes="window-caption-button"
+                            chrome:WindowDecorationProperties.ElementRole="MinimizeButton"
+                            Click="MinimizeWindow_OnClick" />
+                    <Button x:Name="MaximizeButton" Content="□" Classes="window-caption-button"
+                            chrome:WindowDecorationProperties.ElementRole="MaximizeButton"
+                            Click="ToggleWindowState_OnClick" />
+                    <Button Content="×" Classes="window-caption-button close"
+                            chrome:WindowDecorationProperties.ElementRole="CloseButton"
+                            Click="CloseWindow_OnClick" />
+                </StackPanel>
+            </Grid>
+        </Border>
+        <views:MainView Grid.Row="1" />
+        <Grid x:Name="ResizeHandles" IsVisible="False">
+            <Border Height="5" VerticalAlignment="Top" Background="Transparent"
+                    chrome:WindowDecorationProperties.ElementRole="ResizeN" />
+            <Border Height="5" VerticalAlignment="Bottom" Background="Transparent"
+                    chrome:WindowDecorationProperties.ElementRole="ResizeS" />
+            <Border Width="5" HorizontalAlignment="Left" Background="Transparent"
+                    chrome:WindowDecorationProperties.ElementRole="ResizeW" />
+            <Border Width="5" HorizontalAlignment="Right" Background="Transparent"
+                    chrome:WindowDecorationProperties.ElementRole="ResizeE" />
+            <Border Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Background="Transparent" chrome:WindowDecorationProperties.ElementRole="ResizeNW" />
+            <Border Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Background="Transparent" chrome:WindowDecorationProperties.ElementRole="ResizeNE" />
+            <Border Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                    Background="Transparent" chrome:WindowDecorationProperties.ElementRole="ResizeSW" />
+            <Border Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Background="Transparent" chrome:WindowDecorationProperties.ElementRole="ResizeSE" />
+        </Grid>
+    </Grid>
 </Window>

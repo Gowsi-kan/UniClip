@@ -66,6 +66,9 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     public partial string PairingInviteCode { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string VerificationPin { get; set; } = "------";
+
+    [ObservableProperty]
     public partial string InvitationInput { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -164,6 +167,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         {
             var invite = await _pairingCoordinator.CreateInviteAsync(CancellationToken.None);
             PairingInviteCode = invite.Encode();
+            VerificationPin = PairingVerificationCode.Create(invite.PeerId);
 
             using var qrData = QRCodeGenerator.GenerateQrCode(PairingInviteCode, QRCodeGenerator.ECCLevel.M);
             var imageBytes = new PngByteQRCode(qrData).GetGraphic(8);
@@ -173,7 +177,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
             PairingQrCode = newImage;
             HasPairingInvite = true;
 
-            PairingStatus = "Invite ready · expires in 10 minutes · authenticated by Noise";
+            PairingStatus = "Invite ready · expires in 10 minutes. Compare the PIN after connecting.";
         }
         catch (Exception exception)
         {
@@ -195,7 +199,8 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         try
         {
             var peerId = await _pairingCoordinator.ConnectAsync(InvitationInput, CancellationToken.None);
-            ConnectionStatus = $"Securely paired · {peerId}";
+            VerificationPin = PairingVerificationCode.Create(peerId);
+            ConnectionStatus = "Securely paired";
             PairedDeviceCount = 1;
             CanSendFiles = SelectedFiles.Count > 0;
             CanClipboardSync = !OperatingSystem.IsBrowser();
@@ -270,7 +275,8 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     {
         Dispatcher.UIThread.Post(() =>
         {
-            ConnectionStatus = $"Securely paired · {peerId}";
+            VerificationPin = PairingVerificationCode.Create(peerId);
+            ConnectionStatus = "Securely paired";
             PairedDeviceCount = 1;
             CanSendFiles = SelectedFiles.Count > 0 && !IsPairingBusy;
             CanClipboardSync = !OperatingSystem.IsBrowser();
