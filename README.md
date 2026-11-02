@@ -10,6 +10,36 @@ instances.
 dotnet run --project UniClip.Desktop
 ```
 
+## Set up PIN pairing
+
+Each desktop app starts a temporary PIN server and displays its own six-digit
+PIN on launch. Share either device's PIN, enter it in the six-digit OTP input
+on the other device, and select **Pair using PIN**. Both PCs must be on the
+same local network. The apps discover each other automatically; no server URL
+or separate service setup is needed.
+
+Allow UniClip through the private-network firewall on both PCs (TCP port 5180
+for PIN exchange, UDP port 5181 for LAN discovery, and the peer-to-peer
+listener). The PIN expires after ten minutes and can be claimed only once.
+Generate a new PIN if it expires.
+
+To run the rendezvous service separately:
+
+```sh
+dotnet run --project UniClip.Rendezvous -- --urls http://0.0.0.0:5180
+```
+
+Treat the PIN like a temporary password: anyone who claims it can retrieve the
+invite, so share it only with the device you intend to pair.
+
+The service keeps pairing entries in memory, rate-limits requests per client
+IP, and loses active PINs when it restarts. Keep it on a trusted local network:
+the HTTP rendezvous request contains the peer invite. Use a properly configured
+HTTPS reverse proxy if exposing the service beyond a trusted LAN. This does
+not add cross-network connectivity; relay support is not implemented. The host
+device may also need to allow UniClip's peer-to-peer listener through its
+private-network firewall.
+
 The default solution builds the shared app and desktop host without platform
 workloads:
 
@@ -31,18 +61,18 @@ transfers.
 
 ## Current status
 
-The app can create a 10-minute QR pairing invite, start a libp2p listener,
-advertise it over mDNS, and connect to a pasted invite. Both devices show the
-same six-digit verification PIN after connecting; compare it to confirm that
-the intended devices paired. The PIN is a visual check, not a replacement for
-the invite or a secret credential. The libp2p stack authenticates peers with
-its Noise handshake (X25519) before reporting a connection. Files are streamed
-in bounded 64 KiB chunks over that encrypted session, checked with SHA-256,
-and saved without overwriting existing files. The receiver must approve each
+The app can create a temporary six-digit PIN through the self-hosted
+rendezvous service, start a libp2p listener, advertise it over mDNS, and claim
+the PIN on another device to retrieve the peer invite. The invite is passed
+between apps automatically and is not shown to the user. The PIN is single-use
+and expires after ten minutes. The libp2p stack authenticates peers with its
+Noise handshake (X25519) before reporting a connection. Files are streamed in
+bounded 64 KiB chunks over that encrypted session, checked with SHA-256, and
+saved without overwriting existing files. The receiver must approve each
 incoming file.
 
-Invites contain reachable local addresses and a peer identity. The receiver
-can scan the QR with a QR reader and paste its payload into the invite field.
+Invites contain reachable local addresses and a peer identity. PIN pairing
+therefore requires both devices to be reachable on the same local network.
 Device identities are currently in-memory only, so devices must pair again
 after an app restart.
 
@@ -67,4 +97,5 @@ supported way to run UniClip on a Windows or Linux laptop.
 
 - `UniClip/` - shared Avalonia UI and view models.
 - `UniClip.Desktop/` - Windows, Linux, and macOS desktop host.
+- `UniClip.Rendezvous/` - self-hosted API that exchanges temporary pairing invites by PIN.
 - `UniClip.Browser/` - optional WebAssembly preview host.

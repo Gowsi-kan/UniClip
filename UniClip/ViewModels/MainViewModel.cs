@@ -6,12 +6,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Input.Platform;
-using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using QRCoder;
 using UniClip.Services;
 
 namespace UniClip.ViewModels;
@@ -27,6 +25,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     private bool _captureClipboardBaseline;
     private int _clipboardPollInProgress;
     private string? _lastClipboardReadError;
+    private bool _pairingInitialized;
 
     public MainViewModel()
     {
@@ -37,6 +36,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         _pairingCoordinator.IncomingClipboardRequested += ApplyIncomingClipboardAsync;
         _clipboardTimer.Interval = TimeSpan.FromMilliseconds(800);
         _clipboardTimer.Tick += OnClipboardTimerTick;
+        PairingStatus = PairingServerStartupStatus.Message;
         CanPair = !OperatingSystem.IsBrowser();
         if (!CanPair)
         {
@@ -63,28 +63,34 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     public partial string PairingStatus { get; set; } = "Start a temporary, encrypted device pairing.";
 
     [ObservableProperty]
-    public partial string PairingInviteCode { get; set; } = string.Empty;
+    public partial string DisplayedPairingPin { get; set; } = "------";
 
     [ObservableProperty]
-    public partial string VerificationPin { get; set; } = "------";
+    public partial string PinDigit1 { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string InvitationInput { get; set; } = string.Empty;
+    public partial string PinDigit2 { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PinDigit3 { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PinDigit4 { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PinDigit5 { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PinDigit6 { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string ConnectionStatus { get; set; } = "Not connected";
-
-    [ObservableProperty]
-    public partial Bitmap? PairingQrCode { get; set; }
 
     [ObservableProperty]
     public partial bool IsPairingBusy { get; set; }
 
     [ObservableProperty]
     public partial bool CanPair { get; set; }
-
-    [ObservableProperty]
-    public partial bool HasPairingInvite { get; set; }
 
     [ObservableProperty]
     public partial int PairedDeviceCount { get; set; }
@@ -103,11 +109,46 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
 
     public ObservableCollection<SelectedFile> SelectedFiles { get; } = [];
 
+    public async Task InitializePairingAsync()
+    {
+        if (_pairingInitialized || !CanPair)
+        {
+            return;
+        }
+
+        _pairingInitialized = true;
+        await CreatePairingCodeAsync();
+    }
+
+    public void SetPinDigit(int index, string digit)
+    {
+        switch (index)
+        {
+            case 0: PinDigit1 = digit; break;
+            case 1: PinDigit2 = digit; break;
+            case 2: PinDigit3 = digit; break;
+            case 3: PinDigit4 = digit; break;
+            case 4: PinDigit5 = digit; break;
+            case 5: PinDigit6 = digit; break;
+            default: throw new ArgumentOutOfRangeException(nameof(index));
+        }
+    }
+
+    public void SetPairingPin(string pin)
+    {
+        var digits = pin.Where(character => character is >= '0' and <= '9')
+            .Take(6)
+            .ToArray();
+        for (var index = 0; index < 6; index++)
+        {
+            SetPinDigit(index, index < digits.Length ? digits[index].ToString() : string.Empty);
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         _clipboardTimer.Stop();
         _pendingIncomingApproval?.TrySetResult(false);
-        PairingQrCode?.Dispose();
         await _pairingCoordinator.DisposeAsync();
         _incomingApprovalLock.Dispose();
     }
@@ -158,7 +199,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     }
 
     [RelayCommand]
-    private async Task CreatePairingInviteAsync()
+    private async Task CreatePairingCodeAsync()
     {
         IsPairingBusy = true;
         CanPair = false;
@@ -166,22 +207,16 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         try
         {
             var invite = await _pairingCoordinator.CreateInviteAsync(CancellationToken.None);
-            PairingInviteCode = invite.Encode();
-            VerificationPin = PairingVerificationCode.Create(invite.PeerId);
-
-            using var qrData = QRCodeGenerator.GenerateQrCode(PairingInviteCode, QRCodeGenerator.ECCLevel.M);
-            var imageBytes = new PngByteQRCode(qrData).GetGraphic(8);
-            using var imageStream = new MemoryStream(imageBytes);
-            var newImage = new Bitmap(imageStream);
-            PairingQrCode?.Dispose();
-            PairingQrCode = newImage;
-            HasPairingInvite = true;
-
-            PairingStatus = "Invite ready · expires in 10 minutes. Compare the PIN after connecting.";
+            PairingStatus = "Registering a temporary PIN…";
+            var pin = await _pairingCoordinator.CreatePairingCodeAsync(
+                invite,
+                CancellationToken.None);
+            DisplayedPairingPin = $"{pin[..3]} {pin[3..]}";
+            PairingStatus = "PIN ready · enter it on the other device within 10 minutes.";
         }
         catch (Exception exception)
         {
-            PairingStatus = $"Could not create pairing invite: {exception.Message}";
+            PairingStatus = $"Could not create a pairing PIN: {exception.Message}";
         }
         finally
         {
@@ -191,15 +226,20 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     }
 
     [RelayCommand]
-    private async Task ConnectToInviteAsync()
+    private async Task ConnectToPinAsync()
     {
         IsPairingBusy = true;
         CanPair = false;
         ConnectionStatus = "Connecting and verifying device identity…";
         try
         {
-            var peerId = await _pairingCoordinator.ConnectAsync(InvitationInput, CancellationToken.None);
-            VerificationPin = PairingVerificationCode.Create(peerId);
+            var enteredPin = string.Concat(PinDigit1, PinDigit2, PinDigit3, PinDigit4, PinDigit5, PinDigit6);
+            var normalizedPin = PairingPin.Normalize(enteredPin);
+            await _pairingCoordinator.ConnectToPinAsync(
+                normalizedPin,
+                CancellationToken.None);
+            DisplayedPairingPin = $"{normalizedPin[..3]} {normalizedPin[3..]}";
+            SetPairingPin(string.Empty);
             ConnectionStatus = "Securely paired";
             PairedDeviceCount = 1;
             CanSendFiles = SelectedFiles.Count > 0;
@@ -275,7 +315,6 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     {
         Dispatcher.UIThread.Post(() =>
         {
-            VerificationPin = PairingVerificationCode.Create(peerId);
             ConnectionStatus = "Securely paired";
             PairedDeviceCount = 1;
             CanSendFiles = SelectedFiles.Count > 0 && !IsPairingBusy;

@@ -1,6 +1,8 @@
 
 using System;
+using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using UniClip.ViewModels;
@@ -83,28 +85,93 @@ public partial class MainView : UserControl
         }
     }
 
-    private async void CopyPairingInvite_OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void PinDigit_OnTextChanged(object? sender, TextChangedEventArgs e)
     {
-        if (DataContext is not MainViewModel viewModel || string.IsNullOrEmpty(viewModel.PairingInviteCode))
+        if (sender is not TextBox textBox ||
+            DataContext is not MainViewModel viewModel ||
+            !int.TryParse(textBox.Tag?.ToString(), out var digitNumber))
         {
             return;
         }
 
-        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-        if (clipboard is null)
+        var digits = new string((textBox.Text ?? string.Empty)
+            .Where(character => character is >= '0' and <= '9')
+            .ToArray());
+        if (digits.Length > 1)
         {
-            viewModel.PairingStatus = "Clipboard access is unavailable on this device.";
+            viewModel.SetPairingPin(digits);
+            FocusPinDigit(Math.Min(digits.Length, 5));
             return;
         }
 
-        try
+        var digit = digits.Length == 0 ? string.Empty : digits;
+        if (textBox.Text != digit)
         {
-            await clipboard.SetTextAsync(viewModel.PairingInviteCode);
-            viewModel.PairingStatus = "Invite copied · expires in 10 minutes";
+            textBox.Text = digit;
+            textBox.CaretIndex = digit.Length;
         }
-        catch (Exception exception)
+
+        viewModel.SetPinDigit(digitNumber - 1, digit);
+        if (digit.Length == 1 && digitNumber < 6)
         {
-            viewModel.PairingStatus = $"Could not copy invite: {exception.Message}";
+            FocusPinDigit(digitNumber);
         }
+    }
+
+    private async void PinDigit_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox textBox ||
+            !int.TryParse(textBox.Tag?.ToString(), out var digitNumber))
+        {
+            return;
+        }
+
+        var index = digitNumber - 1;
+        if (e.Key == Key.V &&
+            (e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0)
+        {
+            e.Handled = true;
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard is null)
+            {
+                return;
+            }
+
+            var clipboardText = await clipboard.TryGetTextAsync();
+            if (DataContext is MainViewModel viewModel && clipboardText is not null)
+            {
+                var digits = new string(clipboardText
+                    .Where(character => character is >= '0' and <= '9')
+                    .Take(6)
+                    .ToArray());
+                viewModel.SetPairingPin(digits);
+                FocusPinDigit(Math.Min(digits.Length, 5));
+            }
+
+            return;
+        }
+
+        if (e.Key == Key.Back && string.IsNullOrEmpty(textBox.Text) && index > 0)
+        {
+            e.Handled = true;
+            FocusPinDigit(index - 1);
+        }
+        else if (e.Key == Key.Left && index > 0)
+        {
+            e.Handled = true;
+            FocusPinDigit(index - 1);
+        }
+        else if (e.Key == Key.Right && index < 5)
+        {
+            e.Handled = true;
+            FocusPinDigit(index + 1);
+        }
+    }
+
+    private void FocusPinDigit(int index)
+    {
+        var textBox = this.FindControl<TextBox>($"PinDigit{index + 1}");
+        textBox?.Focus();
+        textBox?.SelectAll();
     }
 }

@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using UniClip.ViewModels;
 
 namespace UniClip.Views;
 
@@ -21,6 +22,16 @@ public partial class MainWindow : Window
             ResizeHandles.IsVisible = true;
             Win32Properties.SetWindowCornerPreference(this, Win32Properties.WindowCornerPreference.Round);
             UpdateWindowStateVisuals();
+        }
+
+    }
+
+    protected override async void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        if (DataContext is MainViewModel viewModel)
+        {
+            await viewModel.InitializePairingAsync();
         }
     }
 

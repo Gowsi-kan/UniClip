@@ -62,61 +62,56 @@
                                 FontSize="19"
                                 FontWeight="SemiBold" />
                             <TextBlock
-                                Text="Share the QR invite (or paste its data here), then compare the PIN after connecting."
+                                Text="Share this PIN with the other device, then enter its PIN here. Both devices must be on the same local network."
                                 Foreground="#A1ABA1" FontSize="11" TextWrapping="Wrap" />
                         </StackPanel>
 
                         <Border Background="#0F1511" BorderBrush="#27312A" BorderThickness="1"
-                            CornerRadius="14" Padding="10" Height="164">
-                            <Grid ColumnDefinitions="148,*" ColumnSpacing="12">
-                                <Grid>
-                                    <StackPanel HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Spacing="8">
-                                        <TextBlock Text="QR INVITE" Foreground="#89958A"
-                                            FontSize="9"
-                                            FontWeight="Bold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Create an invite to show its QR code."
-                                            Foreground="#A1ABA1" FontSize="11"
-                                            TextAlignment="Center"
-                                            TextWrapping="Wrap" MaxWidth="130" />
-                                    </StackPanel>
-                                    <Image Source="{Binding PairingQrCode}" Width="144" Height="144"
-                                        IsVisible="{Binding HasPairingInvite}"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Grid>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="7">
-                                    <TextBlock Text="VERIFICATION PIN" Foreground="#89958A"
-                                        FontSize="9"
-                                        FontWeight="Bold" />
-                                    <TextBlock Text="{Binding VerificationPin}" Foreground="#B8F36B"
-                                        FontSize="33" FontWeight="Bold" />
-                                    <TextBlock
-                                        Text="Compare this six-digit PIN on both devices after they connect."
-                                        Foreground="#A1ABA1" FontSize="10" TextWrapping="Wrap"
-                                        LineHeight="15" />
-                                </StackPanel>
-                            </Grid>
+                            CornerRadius="14" Padding="10" Height="112">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Spacing="5">
+                                <TextBlock Text="YOUR PAIRING PIN" Foreground="#89958A" FontSize="9"
+                                    FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding DisplayedPairingPin}" Foreground="#B8F36B"
+                                    FontSize="33" FontWeight="Bold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Enter this code on the other device. Expires in 10 minutes."
+                                    Foreground="#A1ABA1" FontSize="10" TextWrapping="Wrap"
+                                    TextAlignment="Center" />
+                            </StackPanel>
                         </Border>
 
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Create / refresh invite"
-                                Command="{Binding CreatePairingInviteCommand}"
-                                IsEnabled="{Binding CanPair}" Classes="primary" />
-                            <Button Content="Copy invite data" Click="CopyPairingInvite_OnClick"
-                                IsVisible="{Binding HasPairingInvite}" Classes="secondary" />
-                        </StackPanel>
+                        <Button Content="Generate a new PIN"
+                            Command="{Binding CreatePairingCodeCommand}"
+                            IsEnabled="{Binding CanPair}" Classes="secondary" />
                         <TextBlock Text="{Binding PairingStatus}" Foreground="#A1ABA1" FontSize="10"
                             TextWrapping="Wrap" MaxHeight="34" />
 
-                        <TextBox Text="{Binding InvitationInput}"
-                            PlaceholderText="Paste the other device's invite here"
-                            AcceptsReturn="False" TextWrapping="NoWrap"
-                            HorizontalAlignment="Stretch" />
-                        <Button Content="Connect securely"
-                            Command="{Binding ConnectToInviteCommand}"
-                            IsEnabled="{Binding CanPair}" HorizontalAlignment="Stretch"
-                            Classes="secondary" />
+                        <TextBlock Text="ENTER THE OTHER DEVICE'S PIN" Foreground="#89958A"
+                            FontSize="9" FontWeight="Bold" />
+                        <Grid ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="7"
+                            HorizontalAlignment="Center">
+                            <TextBox x:Name="PinDigit1" Grid.Column="0" Tag="1" MaxLength="6"
+                                Text="{Binding PinDigit1}" Classes="pin-digit"
+                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                            <TextBox x:Name="PinDigit2" Grid.Column="1" Tag="2" MaxLength="6"
+                                Text="{Binding PinDigit2}" Classes="pin-digit"
+                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                            <TextBox x:Name="PinDigit3" Grid.Column="2" Tag="3" MaxLength="6"
+                                Text="{Binding PinDigit3}" Classes="pin-digit"
+                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                            <TextBox x:Name="PinDigit4" Grid.Column="3" Tag="4" MaxLength="6"
+                                Text="{Binding PinDigit4}" Classes="pin-digit"
+                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                            <TextBox x:Name="PinDigit5" Grid.Column="4" Tag="5" MaxLength="6"
+                                Text="{Binding PinDigit5}" Classes="pin-digit"
+                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                            <TextBox x:Name="PinDigit6" Grid.Column="5" Tag="6" MaxLength="6"
+                                Text="{Binding PinDigit6}" Classes="pin-digit"
+                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                        </Grid>
+                        <Button Content="Pair using PIN"
+                            Command="{Binding ConnectToPinCommand}"
+                            IsEnabled="{Binding CanPair}" HorizontalAlignment="Stretch" Classes="primary" />
                         <TextBlock
                             Text="{Binding PairedDeviceCount, StringFormat='{}{0} PAIRED DEVICE'}"
                             Foreground="#89958A" FontSize="9" FontWeight="Bold"

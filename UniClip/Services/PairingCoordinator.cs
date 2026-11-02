@@ -45,6 +45,19 @@ public sealed class PairingCoordinator : IAsyncDisposable
         return PairingInvite.Create(peer.Identity.PeerId, GetInviteAddresses(peer));
     }
 
+    public async Task<string> CreatePairingCodeAsync(
+        PairingInvite invite,
+        CancellationToken cancellationToken = default) =>
+        await RendezvousPairingClient.RegisterAsync(invite.Encode(), cancellationToken);
+
+    public async Task<string> ConnectToPinAsync(
+        string pin,
+        CancellationToken cancellationToken = default)
+    {
+        var encodedInvite = await RendezvousPairingClient.ClaimAsync(pin, cancellationToken);
+        return await ConnectAsync(encodedInvite, cancellationToken);
+    }
+
     public async Task<string> ConnectAsync(string encodedInvite, CancellationToken cancellationToken = default)
     {
         var invite = PairingInvite.Decode(encodedInvite);

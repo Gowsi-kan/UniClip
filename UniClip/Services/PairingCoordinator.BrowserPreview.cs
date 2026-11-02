@@ -55,6 +55,16 @@ public sealed class PairingCoordinator : IAsyncDisposable
     public Task<PairingInvite> CreateInviteAsync(CancellationToken cancellationToken = default) =>
         Task.FromException<PairingInvite>(CreateBrowserPreviewException());
 
+    public Task<string> CreatePairingCodeAsync(
+        PairingInvite invite,
+        CancellationToken cancellationToken = default) =>
+        Task.FromException<string>(CreateBrowserPreviewException());
+
+    public Task<string> ConnectToPinAsync(
+        string pin,
+        CancellationToken cancellationToken = default) =>
+        Task.FromException<string>(CreateBrowserPreviewException());
+
     public Task<string> ConnectAsync(string encodedInvite, CancellationToken cancellationToken = default) =>
         Task.FromException<string>(CreateBrowserPreviewException());
 

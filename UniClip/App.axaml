@@ -69,5 +69,15 @@
         <Style Selector="Button.window-caption-button.close:pointerover">
             <Setter Property="Background" Value="#34353A" />
         </Style>
+        <Style Selector="TextBox.pin-digit">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
     </Application.Styles>
 </Application>
