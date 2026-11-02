@@ -1,0 +1,15 @@
+@baseUrl = http://localhost:5180
+
+### Register a temporary pairing invite
+POST {{baseUrl}}/api/pairings/
+Content-Type: application/json
+
+{
+  "invite": "unclip-pair:v1:example"
+}
+
+### Claim a PIN returned by the registration request
+POST {{baseUrl}}/api/pairings/123456/claim
+
+### A missing or expired PIN returns 404
+POST {{baseUrl}}/api/pairings/000000/claim

@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UniClip\UniClip.csproj" />
+    <ProjectReference Include="..\UniClip.Rendezvous\UniClip.Rendezvous.csproj" />
   </ItemGroup>
 </Project>
