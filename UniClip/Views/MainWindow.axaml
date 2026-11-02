@@ -37,28 +37,42 @@
                     Orientation="Horizontal">
                     <Button
                         chrome:WindowDecorationProperties.ElementRole="MinimizeButton"
-                        Classes="window-caption-button minimize center"
+                        Classes="window-caption-button minimize"
                         Click="MinimizeWindow_OnClick">
-                        <TextBlock
-                            Margin="0,-1,0,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="11"
-                            Foreground="White"
-                            Text="-" />
+                        <Border Width="10" Height="1" Background="#E8E8EC" />
                     </Button>
                     <Button
                         x:Name="MaximizeButton"
                         chrome:WindowDecorationProperties.ElementRole="MaximizeButton"
                         Classes="window-caption-button maximize"
                         Click="ToggleWindowState_OnClick">
-                        <TextBlock
-                            Margin="0,-1,0,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="11"
-                            Foreground="White"
-                            Text="□" />
+                        <Grid Width="16" Height="16">
+                            <Border
+                                x:Name="MaximizeGlyph"
+                                Width="10"
+                                Height="10"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                BorderBrush="#E8E8EC"
+                                BorderThickness="1" />
+                            <Grid x:Name="RestoreGlyph" IsVisible="False">
+                                <Border
+                                    Width="9"
+                                    Height="9"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    BorderBrush="#E8E8EC"
+                                    BorderThickness="1" />
+                                <Border
+                                    Width="9"
+                                    Height="9"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Bottom"
+                                    Background="#222328"
+                                    BorderBrush="#E8E8EC"
+                                    BorderThickness="1" />
+                            </Grid>
+                        </Grid>
                     </Button>
                     <Button
                         chrome:WindowDecorationProperties.ElementRole="CloseButton"
@@ -70,11 +84,11 @@
                             Background="#168BFF"
                             CornerRadius="8">
                             <TextBlock
-                                Margin="0,-1,0,0"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 FontSize="11"
                                 Foreground="White"
+                                TextAlignment="Center"
                                 Text="×" />
                         </Border>
                     </Button>

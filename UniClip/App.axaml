@@ -54,6 +54,8 @@
             <Setter Property="CornerRadius" Value="0" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="Regular" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style Selector="Button.window-caption-button:pointerover">
             <Setter Property="Background" Value="#34353A" />

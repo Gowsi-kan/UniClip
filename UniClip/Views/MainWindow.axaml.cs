@@ -20,6 +20,7 @@ public partial class MainWindow : Window
             TitleBar.IsVisible = true;
             ResizeHandles.IsVisible = true;
             Win32Properties.SetWindowCornerPreference(this, Win32Properties.WindowCornerPreference.Round);
+            UpdateWindowStateVisuals();
         }
     }
 
@@ -37,9 +38,17 @@ public partial class MainWindow : Window
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == WindowStateProperty && MaximizeButton is not null)
+        if (change.Property == WindowStateProperty && MaximizeGlyph is not null)
         {
-            MaximizeButton.Content = WindowState == Avalonia.Controls.WindowState.Maximized ? "❐" : "□";
+            UpdateWindowStateVisuals();
         }
+    }
+
+    private void UpdateWindowStateVisuals()
+    {
+        var isMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
+        MaximizeGlyph.IsVisible = !isMaximized;
+        RestoreGlyph.IsVisible = isMaximized;
+        ResizeHandles.IsVisible = WindowState == Avalonia.Controls.WindowState.Normal;
     }
 }
