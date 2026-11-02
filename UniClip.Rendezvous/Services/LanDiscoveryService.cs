@@ -66,6 +66,16 @@ public sealed class LanDiscoveryService(ILogger<LanDiscoveryService> logger) : I
                 if (datagram.Buffer.AsSpan().SequenceEqual(requestBytes))
                 {
                     await listener.SendAsync(responseBytes, datagram.RemoteEndPoint, stoppingToken);
+                    logger.LogInformation(
+                        "Received LAN discovery request from {RemoteEndPoint} and sent response",
+                        datagram.RemoteEndPoint);
+                }
+                else
+                {
+                    logger.LogDebug(
+                        "Ignored unrecognized LAN discovery datagram from {RemoteEndPoint} ({Length} bytes)",
+                        datagram.RemoteEndPoint,
+                        datagram.Buffer.Length);
                 }
             }
         }

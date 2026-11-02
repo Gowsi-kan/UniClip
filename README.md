@@ -21,17 +21,20 @@ on the other device, and select **Pair using PIN**. Both PCs must be on the
 same local network. The apps discover each other automatically; no server URL
 or separate service setup is needed.
 
-On first launch, UniClip asks for administrator approval to add persistent
-firewall rules for TCP ports 5180 and 5182 and UDP port 5181 (on Linux, when
-UFW or firewalld is active). Port 5180 exchanges PINs, 5181 discovers devices,
-and 5182 carries the direct peer connection. Windows rules apply to all
-firewall profiles, including Public, but are restricted to the directly
-connected local subnet. Linux UFW and firewalld rules are restricted to private
-and link-local source addresses. This lets two devices on a public Wi-Fi
-hotspot pair, but does not allow access from the wider internet. Public
-networks can include untrusted devices on the same subnet, so only share PINs
-with devices you trust. If automatic setup is unavailable or declined, add the
-same inbound rules manually. Router client isolation can still prevent pairing.
+On Windows, UniClip checks its inbound firewall rules at startup and requests
+administrator approval through the standard Windows prompt only if the rules
+are missing or do not match the required ports. The app itself does not run as
+administrator. On Linux, UniClip requests approval to add rules when UFW or
+firewalld is active. The rules allow TCP ports 5180 and 5182 and UDP port 5181:
+5180 exchanges PINs, 5181 discovers devices, and 5182 carries the direct peer
+connection. Windows rules apply to all firewall profiles, including Public,
+but are restricted to the directly connected local subnet. Linux UFW and
+firewalld rules are restricted to private and link-local source addresses.
+This lets two devices on a public Wi-Fi hotspot pair, but does not allow access
+from the wider internet. Public networks can include untrusted devices on the
+same subnet, so only share PINs with devices you trust. If automatic setup is
+unavailable or declined, add the same inbound rules manually. Router client
+isolation can still prevent pairing.
 The PIN expires after ten minutes and can be claimed only once. Generate a new
 PIN after an unsuccessful connection.
 

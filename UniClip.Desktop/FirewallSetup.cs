@@ -17,7 +17,7 @@ internal static class FirewallSetup
     {
         try
         {
-            if (IsConfigured())
+            if (OperatingSystem.IsLinux() && IsConfigured())
             {
                 return null;
             }
@@ -30,7 +30,11 @@ internal static class FirewallSetup
 
             if (result == FirewallResult.Configured)
             {
-                MarkConfigured();
+                if (OperatingSystem.IsLinux())
+                {
+                    MarkConfigured();
+                }
+
                 return null;
             }
 
@@ -54,18 +58,17 @@ internal static class FirewallSetup
 
     private static FirewallResult ConfigureWindows()
     {
+        if (AreWindowsRulesConfigured())
+        {
+            return FirewallResult.Configured;
+        }
+
         var script = """
             $ErrorActionPreference = 'Stop'
-            if (-not (Get-NetFirewallRule -Name 'UniClipPrivateLanTcp' -ErrorAction SilentlyContinue)) {
-                New-NetFirewallRule -Name 'UniClipPrivateLanTcp' -DisplayName 'UniClip local network (TCP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Any -Protocol TCP -LocalPort 5180,5182 -RemoteAddress LocalSubnet | Out-Null
-            } else {
-                Set-NetFirewallRule -Name 'UniClipPrivateLanTcp' -Profile Any -Enabled True | Out-Null
-            }
-            if (-not (Get-NetFirewallRule -Name 'UniClipPrivateLanUdp' -ErrorAction SilentlyContinue)) {
-                New-NetFirewallRule -Name 'UniClipPrivateLanUdp' -DisplayName 'UniClip local network (UDP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Any -Protocol UDP -LocalPort 5181 -RemoteAddress LocalSubnet | Out-Null
-            } else {
-                Set-NetFirewallRule -Name 'UniClipPrivateLanUdp' -Profile Any -Enabled True | Out-Null
-            }
+            Remove-NetFirewallRule -Name 'UniClipPrivateLanTcp' -ErrorAction SilentlyContinue
+            Remove-NetFirewallRule -Name 'UniClipPrivateLanUdp' -ErrorAction SilentlyContinue
+            New-NetFirewallRule -Name 'UniClipPrivateLanTcp' -DisplayName 'UniClip local network (TCP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Any -Protocol TCP -LocalPort 5180,5182 -RemoteAddress LocalSubnet | Out-Null
+            New-NetFirewallRule -Name 'UniClipPrivateLanUdp' -DisplayName 'UniClip local network (UDP)' -Group 'UniClip' -Direction Inbound -Action Allow -Enabled True -Profile Any -Protocol UDP -LocalPort 5181 -RemoteAddress LocalSubnet | Out-Null
             """;
         var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
         var startInfo = new ProcessStartInfo("powershell.exe")
@@ -85,12 +88,52 @@ internal static class FirewallSetup
             }
 
             process.WaitForExit();
-            return process.ExitCode == 0 ? FirewallResult.Configured : FirewallResult.Failed;
+            return process.ExitCode == 0 && AreWindowsRulesConfigured()
+                ? FirewallResult.Configured
+                : FirewallResult.Failed;
         }
         catch (System.ComponentModel.Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
             return FirewallResult.Cancelled;
         }
+    }
+
+    private static bool AreWindowsRulesConfigured()
+    {
+        var script = """
+            $ErrorActionPreference = 'Stop'
+            function Test-UniClipRule($name, $protocol, $ports) {
+                $rule = Get-NetFirewallRule -Name $name -ErrorAction SilentlyContinue
+                if ($null -eq $rule -or $rule.Enabled -ne 'True' -or
+                    $rule.Direction -ne 'Inbound' -or $rule.Action -ne 'Allow' -or
+                    @($rule.Profile) -notcontains 'Any') {
+                    return $false
+                }
+
+                $portFilter = $rule | Get-NetFirewallPortFilter
+                $addressFilter = $rule | Get-NetFirewallAddressFilter
+                $actualPorts = @($portFilter.LocalPort | ForEach-Object { "$_".Split(',') } | Sort-Object)
+                $expectedPorts = @($ports.Split(',') | Sort-Object)
+                $portDifference = Compare-Object -ReferenceObject $actualPorts -DifferenceObject $expectedPorts
+                return $portFilter.Protocol -eq $protocol -and
+                    $null -eq $portDifference -and
+                    @($addressFilter.RemoteAddress) -contains 'LocalSubnet'
+            }
+
+            if ((Test-UniClipRule 'UniClipPrivateLanTcp' 'TCP' '5180,5182') -and
+                (Test-UniClipRule 'UniClipPrivateLanUdp' 'UDP' '5181')) {
+                Write-Output 'configured'
+            }
+            """;
+        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+        var result = Run(
+            "powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-EncodedCommand",
+            encodedScript);
+        return result.ExitCode == 0 &&
+               result.Output.Trim().Equals("configured", StringComparison.OrdinalIgnoreCase);
     }
 
     private static FirewallResult ConfigureLinux()
