@@ -177,7 +177,8 @@ public sealed class PairingCoordinator : IAsyncDisposable
             };
             try
             {
-                await localPeer.StartListenAsync(token: cancellationToken);
+                var listenAddress = Multiaddress.Decode("/ip4/0.0.0.0/tcp/5182");
+                await localPeer.StartListenAsync([listenAddress], cancellationToken);
                 if (localPeer.ListenAddresses.Count == 0)
                 {
                     throw new InvalidOperationException("No network listener could be started. Check network permissions and try again.");

@@ -212,7 +212,9 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
                 invite,
                 CancellationToken.None);
             DisplayedPairingPin = $"{pin[..3]} {pin[3..]}";
-            PairingStatus = "PIN ready · enter it on the other device within 10 minutes.";
+            PairingStatus = PairingServerStartupStatus.FirewallWarning is { } firewallWarning
+                ? $"PIN ready · enter it within 10 minutes. {firewallWarning}"
+                : "PIN ready · enter it on the other device within 10 minutes.";
         }
         catch (Exception exception)
         {

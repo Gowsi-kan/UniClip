@@ -58,7 +58,7 @@ public static class RendezvousPairingClient
         if (servers.Count == 0)
         {
             throw new InvalidOperationException(
-                "No UniClip PIN server was found. Put both PCs on the same non-guest Wi-Fi and allow UniClip through the private-network firewall for UDP port 5181. Check that the router does not isolate wireless clients.");
+                "No UniClip PIN server was found. Put both PCs on the same non-guest Wi-Fi, set the Windows network profile to Private, and allow inbound UDP port 5181 through the firewall on both PCs. Check that the router does not isolate wireless clients.");
         }
 
         var reachedServer = false;

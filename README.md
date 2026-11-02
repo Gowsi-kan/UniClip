@@ -6,6 +6,9 @@ instances.
 
 ## Run the desktop app
 
+In Visual Studio, open `UniClip.sln` so the desktop app and its referenced
+projects are loaded together.
+
 ```sh
 dotnet run --project UniClip.Desktop
 ```
@@ -18,12 +21,19 @@ on the other device, and select **Pair using PIN**. Both PCs must be on the
 same local network. The apps discover each other automatically; no server URL
 or separate service setup is needed.
 
-Allow UniClip through the private-network firewall on both PCs. PIN exchange
-uses TCP port 5180 and LAN discovery uses UDP port 5181; the direct peer
-connection also needs the app's peer-to-peer listener allowed. Use a regular
-private Wi-Fi network, not a guest network, and ensure the router does not have
-wireless/client isolation enabled. The PIN expires after ten minutes and can
-be claimed only once. Generate a new PIN after an unsuccessful connection.
+On first launch, UniClip asks for administrator approval to add persistent,
+private-LAN-only firewall rules for TCP ports 5180 and 5182 and UDP port 5181
+(on Linux, when UFW or firewalld is active).
+On Windows, set the Wi-Fi network profile to Private; the rules do not open
+these ports on Public networks.
+Port 5180 exchanges PINs, 5181 discovers devices, and 5182 carries the direct
+peer connection. Windows rules are limited to the Private profile and local
+subnets. On Linux, UFW or firewalld rules are limited to private and link-local
+source addresses. If automatic setup is unavailable or declined, add those
+same inbound rules manually. Use a regular private Wi-Fi network, not a guest
+network, and ensure the router does not have wireless/client isolation enabled.
+The PIN expires after ten minutes and can be claimed only once. Generate a new
+PIN after an unsuccessful connection.
 
 If pairing fails, the status message identifies whether UniClip could not find
 or reach a PIN server, or whether the PIN was claimed but the direct device

@@ -15,6 +15,7 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        PairingServerStartupStatus.SetFirewallWarning(FirewallSetup.Configure());
         var rendezvousApplication = RendezvousHost.CreateApplication(
             ["--urls", "http://0.0.0.0:5180"]);
         var rendezvousStarted = false;
