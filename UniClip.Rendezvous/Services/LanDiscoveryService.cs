@@ -1,8 +1,9 @@
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace UniClip.Rendezvous.Services;
 
@@ -66,16 +67,11 @@ public sealed class LanDiscoveryService(ILogger<LanDiscoveryService> logger) : I
                 if (datagram.Buffer.AsSpan().SequenceEqual(requestBytes))
                 {
                     await listener.SendAsync(responseBytes, datagram.RemoteEndPoint, stoppingToken);
-                    logger.LogInformation(
-                        "Received LAN discovery request from {RemoteEndPoint} and sent response",
-                        datagram.RemoteEndPoint);
+                    Debug.WriteLine("Received LAN discovery request from {RemoteEndPoint} and sent response");
                 }
                 else
                 {
-                    logger.LogDebug(
-                        "Ignored unrecognized LAN discovery datagram from {RemoteEndPoint} ({Length} bytes)",
-                        datagram.RemoteEndPoint,
-                        datagram.Buffer.Length);
+                    Debug.WriteLine("Ignored unrecognized LAN discovery datagram from {RemoteEndPoint} ({Length} bytes)");
                 }
             }
         }
