@@ -50,13 +50,10 @@ public sealed class PairingCoordinator : IAsyncDisposable
         CancellationToken cancellationToken = default) =>
         await RendezvousPairingClient.RegisterAsync(invite.Encode(), cancellationToken);
 
-    public async Task<string> ConnectToPinAsync(
+    public Task<string> ClaimPairingInviteAsync(
         string pin,
-        CancellationToken cancellationToken = default)
-    {
-        var encodedInvite = await RendezvousPairingClient.ClaimAsync(pin, cancellationToken);
-        return await ConnectAsync(encodedInvite, cancellationToken);
-    }
+        CancellationToken cancellationToken = default) =>
+        RendezvousPairingClient.ClaimAsync(pin, cancellationToken);
 
     public async Task<string> ConnectAsync(string encodedInvite, CancellationToken cancellationToken = default)
     {
@@ -65,7 +62,22 @@ public sealed class PairingCoordinator : IAsyncDisposable
         var peer = _localPeer ?? throw new InvalidOperationException("The local peer is not available.");
 
         var addresses = invite.Addresses.Select(Multiaddress.Decode).ToArray();
-        var session = await peer.DialAsync(addresses, cancellationToken);
+        ISession session;
+        try
+        {
+            session = await peer.DialAsync(addresses, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            throw new InvalidOperationException(
+                $"The PIN was accepted, but the direct device connection failed. Allow UniClip through the private-network firewall on both PCs, make sure the Wi-Fi does not isolate devices, and create a new PIN because this one has been used. Connection details: {exception.Message}",
+                exception);
+        }
+
         if (session.RemotePeerId.ToString() != invite.PeerId)
         {
             await session.DisconnectAsync();

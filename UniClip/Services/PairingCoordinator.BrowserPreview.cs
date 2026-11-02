@@ -60,7 +60,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
         CancellationToken cancellationToken = default) =>
         Task.FromException<string>(CreateBrowserPreviewException());
 
-    public Task<string> ConnectToPinAsync(
+    public Task<string> ClaimPairingInviteAsync(
         string pin,
         CancellationToken cancellationToken = default) =>
         Task.FromException<string>(CreateBrowserPreviewException());

@@ -18,10 +18,17 @@ on the other device, and select **Pair using PIN**. Both PCs must be on the
 same local network. The apps discover each other automatically; no server URL
 or separate service setup is needed.
 
-Allow UniClip through the private-network firewall on both PCs (TCP port 5180
-for PIN exchange, UDP port 5181 for LAN discovery, and the peer-to-peer
-listener). The PIN expires after ten minutes and can be claimed only once.
-Generate a new PIN if it expires.
+Allow UniClip through the private-network firewall on both PCs. PIN exchange
+uses TCP port 5180 and LAN discovery uses UDP port 5181; the direct peer
+connection also needs the app's peer-to-peer listener allowed. Use a regular
+private Wi-Fi network, not a guest network, and ensure the router does not have
+wireless/client isolation enabled. The PIN expires after ten minutes and can
+be claimed only once. Generate a new PIN after an unsuccessful connection.
+
+If pairing fails, the status message identifies whether UniClip could not find
+or reach a PIN server, or whether the PIN was claimed but the direct device
+connection failed. A connection failure after the PIN is accepted consumes
+that PIN, so create a new one before retrying.
 
 To run the rendezvous service separately:
 

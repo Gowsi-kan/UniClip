@@ -230,14 +230,16 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     {
         IsPairingBusy = true;
         CanPair = false;
-        ConnectionStatus = "Connecting and verifying device identity…";
         try
         {
             var enteredPin = string.Concat(PinDigit1, PinDigit2, PinDigit3, PinDigit4, PinDigit5, PinDigit6);
             var normalizedPin = PairingPin.Normalize(enteredPin);
-            await _pairingCoordinator.ConnectToPinAsync(
+            ConnectionStatus = "Searching for the device with this PIN…";
+            var invite = await _pairingCoordinator.ClaimPairingInviteAsync(
                 normalizedPin,
                 CancellationToken.None);
+            ConnectionStatus = "PIN found · connecting directly to the other device…";
+            await _pairingCoordinator.ConnectAsync(invite, CancellationToken.None);
             DisplayedPairingPin = $"{normalizedPin[..3]} {normalizedPin[3..]}";
             SetPairingPin(string.Empty);
             ConnectionStatus = "Securely paired";

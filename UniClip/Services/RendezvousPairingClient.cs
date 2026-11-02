@@ -58,38 +58,61 @@ public static class RendezvousPairingClient
         if (servers.Count == 0)
         {
             throw new InvalidOperationException(
-                "No UniClip PIN server was found on the local network. Make sure both devices are on the same network and allow UniClip through the private-network firewall.");
+                "No UniClip PIN server was found. Put both PCs on the same non-guest Wi-Fi and allow UniClip through the private-network firewall for UDP port 5181. Check that the router does not isolate wireless clients.");
         }
 
+        var reachedServer = false;
         foreach (var server in servers)
         {
-            using var response = await Client.PostAsync(
-                new Uri($"http://{server}:5180/api/pairings/{normalizedPin}/claim"),
-                content: null,
-                cancellationToken);
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            HttpResponseMessage response;
+            try
+            {
+                response = await Client.PostAsync(
+                    new Uri($"http://{server}:5180/api/pairings/{normalizedPin}/claim"),
+                    content: null,
+                    cancellationToken);
+            }
+            catch (HttpRequestException)
+            {
+                continue;
+            }
+            catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
                 continue;
             }
 
-            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            reachedServer = true;
+            using (response)
             {
-                throw new InvalidOperationException("Too many PIN attempts. Wait a minute and try again.");
-            }
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    continue;
+                }
 
-            response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<ClaimPairingResponse>(cancellationToken);
-            if (string.IsNullOrWhiteSpace(result?.Invite))
-            {
-                throw new InvalidOperationException("The PIN server returned an empty pairing invite.");
-            }
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    throw new InvalidOperationException("Too many PIN attempts. Wait a minute and try again.");
+                }
 
-            return result.Invite;
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadFromJsonAsync<ClaimPairingResponse>(cancellationToken);
+                if (string.IsNullOrWhiteSpace(result?.Invite))
+                {
+                    throw new InvalidOperationException("The PIN server returned an empty pairing invite.");
+                }
+
+                return result.Invite;
+            }
+        }
+
+        if (!reachedServer)
+        {
+            throw new InvalidOperationException(
+                "UniClip found another device, but could not contact its PIN server. Allow UniClip through the private-network firewall for TCP port 5180 on the PC showing the PIN.");
         }
 
         throw new InvalidOperationException(
-            "PIN not found, expired, or already used. Ask the other device to create a new PIN.");
+            "The PIN was not found, has expired, or was already used. Generate a new PIN on the other PC and try again.");
     }
 
     private static async Task<IReadOnlyList<IPAddress>> DiscoverServersAsync(
