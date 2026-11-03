@@ -32,6 +32,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
     }
 
     public event Action<string>? PeerConnected;
+    public event Action<string>? PeerDisconnected;
     public event Action<FileTransferProgress>? TransferProgressChanged;
     public event Action<string>? FileReceived;
     public event Func<IncomingFileRequest, CancellationToken, Task<bool>>? IncomingTransferApprovalRequested;
@@ -99,12 +100,13 @@ public sealed class PairingCoordinator : IAsyncDisposable
             throw new InvalidOperationException("The connected device did not match the identity in the pairing invite.");
         }
 
-        if (_pairedSession is not null && !ReferenceEquals(_pairedSession, session))
+        var previousSession = _pairedSession;
+        TrackPairedSession(session);
+        if (previousSession is not null && !ReferenceEquals(previousSession, session))
         {
-            await _pairedSession.DisconnectAsync();
+            await previousSession.DisconnectAsync();
         }
 
-        _pairedSession = session;
         SessionDiagnostics.Write("Peer", "Direct peer connection authenticated and paired successfully.");
         return invite.PeerId;
     }
@@ -151,8 +153,9 @@ public sealed class PairingCoordinator : IAsyncDisposable
         _disposed = true;
         if (_pairedSession is not null)
         {
-            await _pairedSession.DisconnectAsync();
+            var session = _pairedSession;
             _pairedSession = null;
+            await session.DisconnectAsync();
         }
 
         if (_localPeer is not null)
@@ -202,7 +205,7 @@ public sealed class PairingCoordinator : IAsyncDisposable
             var localPeer = serviceProvider.GetRequiredService<IPeerFactory>().Create();
             localPeer.OnConnected += session =>
             {
-                _pairedSession = session;
+                TrackPairedSession(session);
                 SessionDiagnostics.Write("Peer", $"Libp2p reported an incoming connection from peer {session.RemotePeerId}.");
                 PeerConnected?.Invoke(session.RemotePeerId.ToString());
             };
@@ -234,6 +237,36 @@ public sealed class PairingCoordinator : IAsyncDisposable
         finally
         {
             _startLock.Release();
+        }
+    }
+
+    private void TrackPairedSession(ISession session)
+    {
+        if (ReferenceEquals(_pairedSession, session))
+        {
+            return;
+        }
+
+        _pairedSession = session;
+        _ = ObservePairedSessionClosureAsync(session);
+    }
+
+    private async Task ObservePairedSessionClosureAsync(ISession session)
+    {
+        try
+        {
+            await Task.Delay(Timeout.Infinite, session.Closed);
+        }
+        catch (OperationCanceledException)
+        {
+            if (!ReferenceEquals(_pairedSession, session))
+            {
+                return;
+            }
+
+            _pairedSession = null;
+            SessionDiagnostics.Write("Peer", $"Paired peer session closed: {session.RemotePeerId}.");
+            PeerDisconnected?.Invoke(session.RemotePeerId.ToString());
         }
     }
 

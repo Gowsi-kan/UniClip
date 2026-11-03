@@ -28,6 +28,12 @@ public sealed class PairingCoordinator : IAsyncDisposable
         remove { }
     }
 
+    public event Action<string>? PeerDisconnected
+    {
+        add { }
+        remove { }
+    }
+
     public event Action<FileTransferProgress>? TransferProgressChanged
     {
         add { }

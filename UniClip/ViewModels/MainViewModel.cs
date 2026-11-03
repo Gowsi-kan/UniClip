@@ -30,6 +30,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     public MainViewModel()
     {
         _pairingCoordinator.PeerConnected += OnPeerConnected;
+        _pairingCoordinator.PeerDisconnected += OnPeerDisconnected;
         _pairingCoordinator.TransferProgressChanged += OnTransferProgressChanged;
         _pairingCoordinator.FileReceived += OnFileReceived;
         _pairingCoordinator.IncomingTransferApprovalRequested += ApproveIncomingTransferAsync;
@@ -299,11 +300,9 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         }
         finally
         {
-            SetDisconnectedState();
-            if (disconnectError is not null)
-            {
-                ConnectionStatus = $"Disconnected with an error: {disconnectError}";
-            }
+            SetDisconnectedState(disconnectError is null
+                ? "Disconnected from the paired device."
+                : $"Disconnected with an error: {disconnectError}");
 
             IsPairingBusy = false;
             CanPair = !OperatingSystem.IsBrowser();
@@ -369,6 +368,20 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         });
     }
 
+    private void OnPeerDisconnected(string peerId)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!IsConnected)
+            {
+                return;
+            }
+
+            SessionDiagnostics.Write("Pairing", $"Paired device {peerId} disconnected; returning to the pairing screen.");
+            SetDisconnectedState("Connection lost. The other device disconnected or the network connection was interrupted.");
+        });
+    }
+
     partial void OnIsConnectedChanged(bool value)
     {
         IsDisconnected = !value;
@@ -395,12 +408,12 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         UpdateClipboardSyncTimer();
     }
 
-    private void SetDisconnectedState()
+    private void SetDisconnectedState(string status = "Not connected")
     {
         IsConnected = false;
         IsDisconnected = true;
         PairedPeerLabel = string.Empty;
-        ConnectionStatus = "Not connected";
+        ConnectionStatus = status;
         PairedDeviceCount = 0;
         CanSendFiles = false;
         CanClipboardSync = false;
