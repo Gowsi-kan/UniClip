@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="UniClip.Desktop/UniClip.Desktop.csproj" />
+  <Project Path="UniClip.Rendezvous/UniClip.Rendezvous.csproj" />
+  <Project Path="UniClip/UniClip.csproj" />
+</Solution>
