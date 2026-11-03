@@ -144,11 +144,22 @@ internal static class FirewallSetup
         {
             supportedFirewallFound = true;
             var status = Run(ufw, "status");
-            if (status.ExitCode == 0 && status.Output.Contains("Status: active", StringComparison.OrdinalIgnoreCase))
+            if ((status.ExitCode == 0 && status.Output.Contains("Status: active", StringComparison.OrdinalIgnoreCase)) ||
+                IsSystemdServiceActive("ufw"))
             {
                 var script = new StringBuilder("#!/bin/sh\nset -eu\n");
+                script.Append("status=$(").Append(Quote(ufw)).AppendLine(" status)");
+                script.AppendLine("case \"$status\" in");
+                script.AppendLine("  *'Status: active'*)");
                 AddUfwRules(script, ufw);
-                return RunPrivilegedScript(script.ToString());
+                script.AppendLine("    ;;");
+                script.AppendLine("  *) exit 42 ;;");
+                script.AppendLine("esac");
+                var result = RunPrivilegedScript(script.ToString());
+                if (result != FirewallResult.NoActiveFirewall)
+                {
+                    return result;
+                }
             }
         }
 
@@ -167,6 +178,19 @@ internal static class FirewallSetup
         }
 
         return supportedFirewallFound ? FirewallResult.NoActiveFirewall : FirewallResult.Unavailable;
+    }
+
+    private static bool IsSystemdServiceActive(string service)
+    {
+        var systemctl = FindExecutable("systemctl");
+        if (systemctl is null)
+        {
+            return false;
+        }
+
+        var result = Run(systemctl, "is-active", service);
+        return result.ExitCode == 0 &&
+               result.Output.Trim().Equals("active", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void AddUfwRules(StringBuilder script, string ufw)
@@ -232,6 +256,11 @@ internal static class FirewallSetup
             if (result.ExitCode == 0)
             {
                 return FirewallResult.Configured;
+            }
+
+            if (result.ExitCode == 42)
+            {
+                return FirewallResult.NoActiveFirewall;
             }
 
             return result.ExitCode == 126 ? FirewallResult.Cancelled : FirewallResult.Failed;
