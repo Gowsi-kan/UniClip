@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
@@ -65,6 +66,14 @@ public sealed class LanDiscoveryService(ILogger<LanDiscoveryService> logger) : I
                 var datagram = await listener.ReceiveAsync(stoppingToken);
                 if (datagram.Buffer.AsSpan().SequenceEqual(requestBytes))
                 {
+                    if (IsLocalAddress(datagram.RemoteEndPoint.Address))
+                    {
+                        logger.LogDebug(
+                            "Ignored LAN discovery request originating from this PC ({RemoteEndPoint}).",
+                            datagram.RemoteEndPoint);
+                        continue;
+                    }
+
                     var sent = await listener.SendAsync(responseBytes, datagram.RemoteEndPoint, stoppingToken);
                     logger.LogInformation(
                         "Received LAN discovery request from {RemoteEndPoint} ({RequestBytes} bytes); sent {ResponseBytes} response bytes",
@@ -89,4 +98,10 @@ public sealed class LanDiscoveryService(ILogger<LanDiscoveryService> logger) : I
             logger.LogError(exception, "LAN pairing discovery listener failed.");
         }
     }
+
+    private static bool IsLocalAddress(IPAddress address) =>
+        IPAddress.IsLoopback(address) ||
+        NetworkInterface.GetAllNetworkInterfaces()
+            .SelectMany(network => network.GetIPProperties().UnicastAddresses)
+            .Any(unicast => unicast.Address.Equals(address));
 }

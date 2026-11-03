@@ -178,6 +178,7 @@ public static class RendezvousPairingClient
         SessionDiagnostics.Write(Tag, $"[{sw.ElapsedMilliseconds} ms] Waiting for responses (2 second window).");
 
         var servers = new HashSet<IPAddress>();
+        var localAddresses = GetLocalAddresses();
         var responseBytes = Encoding.ASCII.GetBytes(DiscoveryResponse);
         var received = 0;
 
@@ -198,6 +199,10 @@ public static class RendezvousPairingClient
                 {
                     var preview = response.Buffer.AsSpan(0, Math.Min(response.Buffer.Length, 64));
                     SessionDiagnostics.Write(Tag, $"Unexpected response preview hex={Convert.ToHexString(preview)} ascii=\"{Encoding.ASCII.GetString(preview)}\".");
+                }
+                else if (IsLocalAddress(remote.Address, localAddresses))
+                {
+                    SessionDiagnostics.Write(Tag, $"Ignored discovery response from this PC ({remote.Address}).");
                 }
                 else if (servers.Add(remote.Address))
                 {
@@ -272,6 +277,9 @@ public static class RendezvousPairingClient
                 var maskValue = BinaryPrimitives.ReadUInt32BigEndian(maskBytes);
                 var networkValue = addressValue & maskValue;
                 var broadcastValue = networkValue | ~maskValue;
+                var broadcastBytes = new byte[sizeof(uint)];
+                BinaryPrimitives.WriteUInt32BigEndian(broadcastBytes, broadcastValue);
+                targets.Add(new IPAddress(broadcastBytes));
 
                 var addressCount = broadcastValue - networkValue;
                 var hostCount = addressCount > 1 ? addressCount - 1 : 0;
@@ -303,6 +311,15 @@ public static class RendezvousPairingClient
 
         return targets;
     }
+
+    private static HashSet<IPAddress> GetLocalAddresses() =>
+        NetworkInterface.GetAllNetworkInterfaces()
+            .SelectMany(network => network.GetIPProperties().UnicastAddresses)
+            .Select(unicast => unicast.Address)
+            .ToHashSet();
+
+    private static bool IsLocalAddress(IPAddress address, HashSet<IPAddress> localAddresses) =>
+        IPAddress.IsLoopback(address) || localAddresses.Contains(address);
 
     private static bool IsPrivateLanAddress(IPAddress address)
     {
