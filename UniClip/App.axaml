@@ -42,6 +42,15 @@
             <Setter Property="Background" Value="#202A23" />
             <Setter Property="Foreground" Value="#D6DFD3" />
         </Style>
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#30201F" />
+            <Setter Property="Foreground" Value="#F2B8B5" />
+            <Setter Property="BorderBrush" Value="#5A3431" />
+        </Style>
+        <Style Selector="Button.danger:pointerover">
+            <Setter Property="Background" Value="#432A28" />
+            <Setter Property="BorderBrush" Value="#75413D" />
+        </Style>
         <Style Selector="Button.window-caption-button">
             <Setter Property="Width" Value="27" />
             <Setter Property="Height" Value="32" />

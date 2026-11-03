@@ -87,7 +87,18 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     public partial string ConnectionStatus { get; set; } = "Not connected";
 
     [ObservableProperty]
+    public partial string PairedPeerLabel { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsConnected { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsDisconnected { get; set; } = true;
+
+    [ObservableProperty]
     public partial bool IsPairingBusy { get; set; }
+
+    public bool CanDisconnect => IsConnected && !IsPairingBusy;
 
     [ObservableProperty]
     public partial bool CanPair { get; set; }
@@ -247,17 +258,9 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
                 normalizedPin,
                 CancellationToken.None);
             ConnectionStatus = "PIN found · connecting directly to the other device…";
-            await _pairingCoordinator.ConnectAsync(invite, CancellationToken.None);
-            DisplayedPairingPin = $"{normalizedPin[..3]} {normalizedPin[3..]}";
+            var peerId = await _pairingCoordinator.ConnectAsync(invite, CancellationToken.None);
             SetPairingPin(string.Empty);
-            ConnectionStatus = "Securely paired";
-            PairedDeviceCount = 1;
-            CanSendFiles = SelectedFiles.Count > 0;
-            CanClipboardSync = !OperatingSystem.IsBrowser();
-            ClipboardSyncStatus = IsClipboardSyncEnabled
-                ? "Paired · checking for clipboard changes…"
-                : "Paired · enable sync on both devices to share text.";
-            UpdateClipboardSyncTimer();
+            SetConnectedState(peerId);
             SessionDiagnostics.Write("Pairing", "UI pairing flow completed successfully.");
         }
         catch (Exception exception)
@@ -267,6 +270,41 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         }
         finally
         {
+            IsPairingBusy = false;
+            CanPair = !OperatingSystem.IsBrowser();
+        }
+    }
+
+    [RelayCommand]
+    private async Task DisconnectAsync()
+    {
+        if (!IsConnected || IsPairingBusy)
+        {
+            return;
+        }
+
+        IsPairingBusy = true;
+        ConnectionStatus = "Disconnecting…";
+        SessionDiagnostics.Write("Pairing", "User requested to disconnect the paired device.");
+        string? disconnectError = null;
+        try
+        {
+            await _pairingCoordinator.DisconnectAsync();
+            SessionDiagnostics.Write("Pairing", "Disconnect completed successfully.");
+        }
+        catch (Exception exception)
+        {
+            SessionDiagnostics.Write("Pairing", "Disconnect reported an error.", exception);
+            disconnectError = exception.Message;
+        }
+        finally
+        {
+            SetDisconnectedState();
+            if (disconnectError is not null)
+            {
+                ConnectionStatus = $"Disconnected with an error: {disconnectError}";
+            }
+
             IsPairingBusy = false;
             CanPair = !OperatingSystem.IsBrowser();
         }
@@ -327,15 +365,49 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     {
         Dispatcher.UIThread.Post(() =>
         {
-            ConnectionStatus = "Securely paired";
-            PairedDeviceCount = 1;
-            CanSendFiles = SelectedFiles.Count > 0 && !IsPairingBusy;
-            CanClipboardSync = !OperatingSystem.IsBrowser();
-            ClipboardSyncStatus = IsClipboardSyncEnabled
-                ? "Paired · checking for clipboard changes…"
-                : "Paired · enable sync on both devices to share text.";
-            UpdateClipboardSyncTimer();
+            SetConnectedState(peerId);
         });
+    }
+
+    partial void OnIsConnectedChanged(bool value)
+    {
+        IsDisconnected = !value;
+        OnPropertyChanged(nameof(CanDisconnect));
+    }
+
+    partial void OnIsPairingBusyChanged(bool value) =>
+        OnPropertyChanged(nameof(CanDisconnect));
+
+    private void SetConnectedState(string peerId)
+    {
+        IsConnected = true;
+        IsDisconnected = false;
+        PairedPeerLabel = string.IsNullOrEmpty(peerId)
+            ? "Paired device"
+            : $"Peer {peerId[..Math.Min(12, peerId.Length)]}";
+        ConnectionStatus = "Securely paired";
+        PairedDeviceCount = 1;
+        CanSendFiles = SelectedFiles.Count > 0 && !IsPairingBusy;
+        CanClipboardSync = !OperatingSystem.IsBrowser();
+        ClipboardSyncStatus = IsClipboardSyncEnabled
+            ? "Paired · checking for clipboard changes…"
+            : "Paired · enable sync on both devices to share text.";
+        UpdateClipboardSyncTimer();
+    }
+
+    private void SetDisconnectedState()
+    {
+        IsConnected = false;
+        IsDisconnected = true;
+        PairedPeerLabel = string.Empty;
+        ConnectionStatus = "Not connected";
+        PairedDeviceCount = 0;
+        CanSendFiles = false;
+        CanClipboardSync = false;
+        IsClipboardSyncEnabled = false;
+        SetPairingPin(string.Empty);
+        ClipboardSyncStatus = "Pair a device, then opt in on both devices.";
+        UpdateClipboardSyncTimer();
     }
 
     private void UpdateClipboardSyncTimer()

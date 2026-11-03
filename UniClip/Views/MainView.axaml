@@ -22,15 +22,29 @@
                             FontSize="9" />
                     </StackPanel>
                 </StackPanel>
-                <Border Grid.Column="1" CornerRadius="16" Background="#171F1B" BorderBrush="#29332C"
-                    BorderThickness="1" Padding="12,8" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Ellipse Width="7" Height="7" Fill="#B8F36B" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding ConnectionStatus}" Foreground="#C5CEC4"
-                            FontSize="12"
-                            VerticalAlignment="Center" />
-                    </StackPanel>
-                </Border>
+                <Grid Grid.Column="1">
+                    <Border IsVisible="{Binding IsDisconnected}" CornerRadius="16"
+                        Background="#171F1B" BorderBrush="#29332C" BorderThickness="1"
+                        Padding="12,8" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Ellipse Width="7" Height="7" Fill="#89958A"
+                                VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionStatus}" Foreground="#C5CEC4"
+                                FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border IsVisible="{Binding IsConnected}" CornerRadius="16"
+                        Background="#172219" BorderBrush="#354B34" BorderThickness="1"
+                        Padding="12,8" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Ellipse Width="7" Height="7" Fill="#B8F36B"
+                                VerticalAlignment="Center" />
+                            <TextBlock Text="SECURELY CONNECTED" Foreground="#D6DFD3"
+                                FontSize="10" FontWeight="SemiBold"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Grid>
 
             <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
@@ -49,9 +63,10 @@
             </Grid>
 
             <Grid Grid.Row="2" ColumnDefinitions="0.92*,1.08*" ColumnSpacing="14">
-                <Border Background="#141B17" BorderBrush="#2D3931" BorderThickness="1"
-                    CornerRadius="20" Padding="18">
-                    <StackPanel Spacing="10">
+                <Grid>
+                    <Border IsVisible="{Binding IsDisconnected}" Background="#141B17"
+                        BorderBrush="#2D3931" BorderThickness="1" CornerRadius="20" Padding="18">
+                        <StackPanel Spacing="10">
                         <StackPanel Spacing="4">
                             <TextBlock Text="PAIR YOUR DEVICES" Foreground="#B8F36B" FontSize="10"
                                 FontWeight="Bold" />
@@ -74,8 +89,8 @@
                                 <TextBlock Text="Enter this code on the other device. Expires in 10 minutes."
                                     Foreground="#A1ABA1" FontSize="10" TextWrapping="Wrap"
                                     TextAlignment="Center" />
-                            </StackPanel>
-                        </Border>
+                                </StackPanel>
+                            </Border>
 
                         <Button Content="Generate a new PIN"
                             Command="{Binding CreatePairingCodeCommand}"
@@ -115,6 +130,44 @@
                             HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>
+
+                <Border IsVisible="{Binding IsConnected}" Background="#141B17"
+                    BorderBrush="#2D3931" BorderThickness="1" CornerRadius="20" Padding="20">
+                    <StackPanel VerticalAlignment="Center" Spacing="16">
+                        <Border Width="54" Height="54" CornerRadius="18"
+                            Background="#202A23" HorizontalAlignment="Center">
+                            <TextBlock Text="✓" Foreground="#B8F36B" FontSize="27"
+                                FontWeight="SemiBold" HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="DEVICE CONNECTED" Foreground="#B8F36B"
+                                FontSize="10" FontWeight="Bold"
+                                HorizontalAlignment="Center" />
+                            <TextBlock Text="You’re ready to share."
+                                Foreground="#F0F4EF" FontSize="20" FontWeight="SemiBold"
+                                TextAlignment="Center" />
+                            <TextBlock Text="{Binding PairedPeerLabel}"
+                                Foreground="#A1ABA1" FontSize="12"
+                                HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <Border Background="#0F1511" BorderBrush="#27312A"
+                            BorderThickness="1" CornerRadius="12" Padding="12">
+                            <StackPanel Orientation="Horizontal" Spacing="9">
+                                <Ellipse Width="7" Height="7" Fill="#B8F36B"
+                                    VerticalAlignment="Center" />
+                                <TextBlock Text="End-to-end encrypted connection"
+                                    Foreground="#C5CEC4" FontSize="10"
+                                    VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <Button Content="Disconnect device"
+                            Command="{Binding DisconnectCommand}"
+                            IsEnabled="{Binding CanDisconnect}"
+                            Classes="danger" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Border>
+                </Grid>
 
                 <Grid Grid.Column="1" RowDefinitions="*,*" RowSpacing="14">
                     <Border Background="#141B17" BorderBrush="#28332C" BorderThickness="1"

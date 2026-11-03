@@ -68,6 +68,8 @@ public sealed class PairingCoordinator : IAsyncDisposable
     public Task<string> ConnectAsync(string encodedInvite, CancellationToken cancellationToken = default) =>
         Task.FromException<string>(CreateBrowserPreviewException());
 
+    public Task DisconnectAsync() => Task.FromException(CreateBrowserPreviewException());
+
     public Task<string> SendFileAsync(
         Stream source,
         string fileName,

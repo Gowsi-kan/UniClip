@@ -109,6 +109,20 @@ public sealed class PairingCoordinator : IAsyncDisposable
         return invite.PeerId;
     }
 
+    public async Task DisconnectAsync()
+    {
+        var session = _pairedSession;
+        if (session is null)
+        {
+            return;
+        }
+
+        _pairedSession = null;
+        SessionDiagnostics.Write("Peer", "Disconnecting the paired peer session.");
+        await session.DisconnectAsync();
+        SessionDiagnostics.Write("Peer", "Paired peer session disconnected.");
+    }
+
     public async Task<string> SendFileAsync(
         Stream source,
         string fileName,
