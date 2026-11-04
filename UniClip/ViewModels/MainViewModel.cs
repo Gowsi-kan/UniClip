@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Input.Platform;
@@ -20,6 +21,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     private readonly SemaphoreSlim _incomingApprovalLock = new(1, 1);
     private TaskCompletionSource<bool>? _pendingIncomingApproval;
     private readonly DispatcherTimer _clipboardTimer = new();
+    private readonly DispatcherTimer _wifiStatusTimer = new();
     private IClipboard? _clipboard;
     private string? _lastObservedClipboardText;
     private bool _captureClipboardBaseline;
@@ -37,6 +39,10 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         _pairingCoordinator.IncomingClipboardRequested += ApplyIncomingClipboardAsync;
         _clipboardTimer.Interval = TimeSpan.FromMilliseconds(800);
         _clipboardTimer.Tick += OnClipboardTimerTick;
+        _wifiStatusTimer.Interval = TimeSpan.FromSeconds(5);
+        _wifiStatusTimer.Tick += OnWifiStatusTimerTick;
+        _wifiStatusTimer.Start();
+        UpdateWifiConnectionStatus();
         PairingStatus = PairingServerStartupStatus.Message;
         CanPair = !OperatingSystem.IsBrowser();
         if (!CanPair)
@@ -95,6 +101,13 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
 
     [ObservableProperty]
     public partial bool IsDisconnected { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsWifiConnected { get; set; }
+
+    public bool IsWifiDisconnected => !IsWifiConnected;
+
+    partial void OnIsWifiConnectedChanged(bool value) => OnPropertyChanged(nameof(IsWifiDisconnected));
 
     [ObservableProperty]
     public partial bool IsPairingBusy { get; set; }
@@ -162,6 +175,7 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         _clipboardTimer.Stop();
+        _wifiStatusTimer.Stop();
         _pendingIncomingApproval?.TrySetResult(false);
         await _pairingCoordinator.DisposeAsync();
         _incomingApprovalLock.Dispose();
@@ -436,6 +450,52 @@ public partial class MainViewModel : ViewModelBase, IAsyncDisposable
         else
         {
             _clipboardTimer.Stop();
+        }
+    }
+
+    private void OnWifiStatusTimerTick(object? sender, EventArgs e) => UpdateWifiConnectionStatus();
+
+    private void UpdateWifiConnectionStatus()
+    {
+        var isWifiConnected = false;
+        try
+        {
+            var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+            var wirelessInterfaces = networkInterfaces
+                .Where(networkInterface => networkInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+                .ToArray();
+
+            // Some drivers/platforms expose Wi-Fi adapters as Ethernet. Use the platform's
+            // network-available signal only when it doesn't report any wireless adapters.
+            isWifiConnected = wirelessInterfaces.Length > 0
+                ? wirelessInterfaces.Any(networkInterface => networkInterface.OperationalStatus == OperationalStatus.Up)
+                : NetworkInterface.GetIsNetworkAvailable();
+        }
+        catch (NetworkInformationException)
+        {
+            isWifiConnected = GetFallbackNetworkState();
+        }
+        catch (PlatformNotSupportedException)
+        {
+            isWifiConnected = GetFallbackNetworkState();
+        }
+
+        IsWifiConnected = isWifiConnected;
+    }
+
+    private static bool GetFallbackNetworkState()
+    {
+        try
+        {
+            return NetworkInterface.GetIsNetworkAvailable();
+        }
+        catch (NetworkInformationException)
+        {
+            return false;
+        }
+        catch (PlatformNotSupportedException)
+        {
+            return false;
         }
     }
 
