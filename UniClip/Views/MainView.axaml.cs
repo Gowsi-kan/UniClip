@@ -140,10 +140,9 @@ public partial class MainView : UserControl
             var clipboardText = await clipboard.TryGetTextAsync();
             if (DataContext is MainViewModel viewModel && clipboardText is not null)
             {
-                var digits = new string(clipboardText
+                var digits = new string([.. clipboardText
                     .Where(character => character is >= '0' and <= '9')
-                    .Take(6)
-                    .ToArray());
+                    .Take(6)]);
                 viewModel.SetPairingPin(digits);
                 FocusPinDigit(Math.Min(digits.Length, 5));
             }

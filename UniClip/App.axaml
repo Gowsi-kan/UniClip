@@ -3,90 +3,360 @@
              xmlns:local="using:UniClip"
              x:Class="UniClip.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+
+                <!-- ================= iOS Light ================= -->
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="SystemAccentColor">#B8F36B</Color>
+                    <Color x:Key="SystemAccentColorLight1">#C8F68B</Color>
+                    <Color x:Key="SystemAccentColorLight2">#D8F8AB</Color>
+                    <Color x:Key="SystemAccentColorLight3">#E8FBCB</Color>
+                    <Color x:Key="SystemAccentColorDark1">#93CE45</Color>
+                    <Color x:Key="SystemAccentColorDark2">#6F9F32</Color>
+                    <Color x:Key="SystemAccentColorDark3">#4A7022</Color>
+
+                    <SolidColorBrush x:Key="IosBgBrush" Color="#F5F3F0" />
+                    <SolidColorBrush x:Key="IosCardBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="IosFillBrush" Color="#F1EFEC" />
+                    <SolidColorBrush x:Key="IosFillStrongBrush" Color="#E7E3DE" />
+                    <SolidColorBrush x:Key="IosSeparatorBrush" Color="#E6E1DB" />
+                    <SolidColorBrush x:Key="IosLabelBrush" Color="#000000" />
+                    <SolidColorBrush x:Key="IosLabel2Brush" Color="#68645F" />
+                    <SolidColorBrush x:Key="IosLabel3Brush" Color="#A8A19A" />
+
+                    <SolidColorBrush x:Key="IosBlueBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosBlueTintBrush" Color="#1FB8F36B" />
+                    <SolidColorBrush x:Key="IosGreenBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosGreenTintBrush" Color="#1FB8F36B" />
+                    <SolidColorBrush x:Key="IosGreenTextBrush" Color="#42651F" />
+                    <SolidColorBrush x:Key="IosRedBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosRedTintBrush" Color="#1FB8F36B" />
+                    <SolidColorBrush x:Key="IosOrangeBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosIndigoBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosTealBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosAccentTextBrush" Color="#26351A" />
+
+                    <SolidColorBrush x:Key="IosSwitchOffBrush" Color="#E9E9EA" />
+                    <SolidColorBrush x:Key="IosTransparentBrush" Color="Transparent" />
+
+                    <!-- TextBox -->
+                    <StaticResource x:Key="TextControlBackground" ResourceKey="IosFillBrush" />
+                    <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="IosFillStrongBrush" />
+                    <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="IosFillBrush" />
+                    <StaticResource x:Key="TextControlBackgroundDisabled" ResourceKey="IosFillBrush" />
+                    <StaticResource x:Key="TextControlBorderBrush" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="IosBlueBrush" />
+                    <StaticResource x:Key="TextControlBorderBrushDisabled" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="TextControlForeground" ResourceKey="IosLabelBrush" />
+                    <StaticResource x:Key="TextControlForegroundPointerOver" ResourceKey="IosLabelBrush" />
+                    <StaticResource x:Key="TextControlForegroundFocused" ResourceKey="IosLabelBrush" />
+                    <StaticResource x:Key="TextControlForegroundDisabled" ResourceKey="IosLabel3Brush" />
+
+                    <!-- ToggleSwitch (UISwitch) -->
+                    <StaticResource x:Key="ToggleSwitchFillOff" ResourceKey="IosSwitchOffBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOffPointerOver" ResourceKey="IosSwitchOffBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOffPressed" ResourceKey="IosSwitchOffBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOff" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOffPointerOver" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOffPressed" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOn" ResourceKey="IosGreenBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOnPointerOver" ResourceKey="IosGreenBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOnPressed" ResourceKey="IosGreenBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOn" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOnPointerOver" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOnPressed" ResourceKey="IosTransparentBrush" />
+                </ResourceDictionary>
+
+                <!-- ================= iOS Dark ================= -->
+                <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="SystemAccentColor">#B8F36B</Color>
+                    <Color x:Key="SystemAccentColorLight1">#C8F68B</Color>
+                    <Color x:Key="SystemAccentColorLight2">#D8F8AB</Color>
+                    <Color x:Key="SystemAccentColorLight3">#E8FBCB</Color>
+                    <Color x:Key="SystemAccentColorDark1">#93CE45</Color>
+                    <Color x:Key="SystemAccentColorDark2">#6F9F32</Color>
+                    <Color x:Key="SystemAccentColorDark3">#4A7022</Color>
+
+                    <SolidColorBrush x:Key="IosBgBrush" Color="#11100F" />
+                    <SolidColorBrush x:Key="IosCardBrush" Color="#1D1B19" />
+                    <SolidColorBrush x:Key="IosFillBrush" Color="#292623" />
+                    <SolidColorBrush x:Key="IosFillStrongBrush" Color="#39342F" />
+                    <SolidColorBrush x:Key="IosSeparatorBrush" Color="#39342F" />
+                    <SolidColorBrush x:Key="IosLabelBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="IosLabel2Brush" Color="#B0A9A2" />
+                    <SolidColorBrush x:Key="IosLabel3Brush" Color="#77716B" />
+
+                    <SolidColorBrush x:Key="IosBlueBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosBlueTintBrush" Color="#33B8F36B" />
+                    <SolidColorBrush x:Key="IosGreenBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosGreenTintBrush" Color="#33B8F36B" />
+                    <SolidColorBrush x:Key="IosGreenTextBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosRedBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosRedTintBrush" Color="#33B8F36B" />
+                    <SolidColorBrush x:Key="IosOrangeBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosIndigoBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosTealBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosAccentTextBrush" Color="#1A2411" />
+
+                    <SolidColorBrush x:Key="IosSwitchOffBrush" Color="#39393D" />
+                    <SolidColorBrush x:Key="IosTransparentBrush" Color="Transparent" />
+
+                    <!-- TextBox -->
+                    <StaticResource x:Key="TextControlBackground" ResourceKey="IosFillBrush" />
+                    <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="IosFillStrongBrush" />
+                    <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="IosFillBrush" />
+                    <StaticResource x:Key="TextControlBackgroundDisabled" ResourceKey="IosFillBrush" />
+                    <StaticResource x:Key="TextControlBorderBrush" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="IosBlueBrush" />
+                    <StaticResource x:Key="TextControlBorderBrushDisabled" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="TextControlForeground" ResourceKey="IosLabelBrush" />
+                    <StaticResource x:Key="TextControlForegroundPointerOver" ResourceKey="IosLabelBrush" />
+                    <StaticResource x:Key="TextControlForegroundFocused" ResourceKey="IosLabelBrush" />
+                    <StaticResource x:Key="TextControlForegroundDisabled" ResourceKey="IosLabel3Brush" />
+
+                    <!-- ToggleSwitch (UISwitch) -->
+                    <StaticResource x:Key="ToggleSwitchFillOff" ResourceKey="IosSwitchOffBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOffPointerOver" ResourceKey="IosSwitchOffBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOffPressed" ResourceKey="IosSwitchOffBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOff" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOffPointerOver" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOffPressed" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOn" ResourceKey="IosGreenBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOnPointerOver" ResourceKey="IosGreenBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOnPressed" ResourceKey="IosGreenBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOn" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOnPointerOver" ResourceKey="IosTransparentBrush" />
+                    <StaticResource x:Key="ToggleSwitchStrokeOnPressed" ResourceKey="IosTransparentBrush" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <!-- Theme-independent -->
+            <SolidColorBrush x:Key="ToggleSwitchContainerBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="ToggleSwitchContainerBackgroundPointerOver" Color="Transparent" />
+            <SolidColorBrush x:Key="ToggleSwitchContainerBackgroundPressed" Color="Transparent" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOffPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOffPressed" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
+            <Thickness x:Key="TextControlBorderThemeThickness">2</Thickness>
+            <Thickness x:Key="TextControlBorderThemeThicknessFocused">2</Thickness>
+
+            <!-- Optional: bundle Inter (Assets/Fonts) and use avares://UniClip/Assets/Fonts#Inter
+                 for identical text on every OS. SF Pro is used when installed (macOS/iOS). -->
+            <FontFamily x:Key="ContentControlThemeFontFamily">SF Pro Text,SF Pro Display,Inter,Segoe UI Variable,Segoe UI,Roboto,Noto Sans,sans-serif</FontFamily>
+            <FontFamily x:Key="IosMonoFontFamily">SF Mono,Menlo,Cascadia Mono,Consolas,monospace</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
-        <Style Selector="Button">
-            <Setter Property="Background" Value="#202A23" />
-            <Setter Property="Foreground" Value="#E7EDE5" />
-            <Setter Property="BorderBrush" Value="#354136" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="12" />
-            <Setter Property="Padding" Value="14,10" />
-            <Setter Property="FontSize" Value="12" />
+
+        <!-- ===== Window / typography ===== -->
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{DynamicResource IosBgBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
+            <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+        <Style Selector="TextBlock.large-title">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
+        </Style>
+        <Style Selector="TextBlock.headline">
+            <Setter Property="FontSize" Value="16" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
         </Style>
-        <Style Selector="Button:pointerover">
-            <Setter Property="Background" Value="#2B382D" />
+        <Style Selector="TextBlock.body">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
         </Style>
-        <Style Selector="Button:pressed">
-            <Setter Property="Background" Value="#354536" />
+        <Style Selector="TextBlock.footnote">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabel2Brush}" />
         </Style>
-        <Style Selector="Button:disabled">
-            <Setter Property="Opacity" Value="0.55" />
+        <Style Selector="TextBlock.accent">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource IosGreenTextBrush}" />
         </Style>
-        <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#B8F36B" />
-            <Setter Property="Foreground" Value="#18210F" />
-            <Setter Property="BorderBrush" Value="#B8F36B" />
+
+        <!-- ===== Containers ===== -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource IosCardBrush}" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="Padding" Value="20" />
         </Style>
-        <Style Selector="Button.primary:pointerover">
-            <Setter Property="Background" Value="#C9FA88" />
+        <Style Selector="Border.well">
+            <Setter Property="Background" Value="{DynamicResource IosFillBrush}" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="12" />
         </Style>
-        <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#202A23" />
-            <Setter Property="Foreground" Value="#D6DFD3" />
+        <Style Selector="Border.capsule">
+            <Setter Property="Background" Value="{DynamicResource IosCardBrush}" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-        <Style Selector="Button.danger">
-            <Setter Property="Background" Value="#30201F" />
-            <Setter Property="Foreground" Value="#F2B8B5" />
-            <Setter Property="BorderBrush" Value="#5A3431" />
+        <Style Selector="Border.capsule-ok">
+            <Setter Property="Background" Value="{DynamicResource IosGreenTintBrush}" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-        <Style Selector="Button.danger:pointerover">
-            <Setter Property="Background" Value="#432A28" />
-            <Setter Property="BorderBrush" Value="#75413D" />
-        </Style>
-        <Style Selector="Button.window-caption-button">
-            <Setter Property="Width" Value="27" />
+        <Style Selector="Border.tile">
+            <Setter Property="Width" Value="32" />
             <Setter Property="Height" Value="32" />
-            <Setter Property="MinWidth" Value="27" />
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="#E8E8EC" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- ===== Button (UIButton) ===== -->
+        <Style Selector="Button">
+            <Setter Property="Background" Value="{DynamicResource IosBlueTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="CornerRadius" Value="0" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="Regular" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="16,7" />
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
-        <Style Selector="Button.window-caption-button:pointerover">
-            <Setter Property="Background" Value="#34353A" />
+        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosBlueTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Opacity" Value="0.8" />
         </Style>
-        <Style Selector="Button.window-caption-button:pressed">
-            <Setter Property="Background" Value="#48494F" />
+        <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosBlueTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Opacity" Value="0.55" />
         </Style>
-        <Style Selector="Button.window-caption-button.close">
+        <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosBlueTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- filled -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{DynamicResource IosBlueBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosBlueBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+            <Setter Property="Opacity" Value="0.88" />
+        </Style>
+        <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosBlueBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+            <Setter Property="Opacity" Value="0.6" />
+        </Style>
+        <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosBlueBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- tinted -->
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="{DynamicResource IosBlueTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
+        </Style>
+
+        <!-- destructive -->
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosRedBrush}" />
+        </Style>
+        <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosRedBrush}" />
+            <Setter Property="Opacity" Value="0.8" />
+        </Style>
+        <Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosRedBrush}" />
+            <Setter Property="Opacity" Value="0.55" />
+        </Style>
+        <Style Selector="Button.danger:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosRedBrush}" />
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- caption buttons -->
+        <Style Selector="Button.window-caption-button">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="MinWidth" Value="28" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="14" />
         </Style>
-        <Style Selector="Button.window-caption-button.close:pointerover">
-            <Setter Property="Background" Value="#34353A" />
+        <Style Selector="Button.window-caption-button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosFillStrongBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
+            <Setter Property="Opacity" Value="1" />
         </Style>
+        <Style Selector="Button.window-caption-button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosFillBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource IosLabelBrush}" />
+            <Setter Property="Opacity" Value="0.7" />
+        </Style>
+        <Style Selector="Button.window-caption-button.close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
+        </Style>
+        <Style Selector="Button.window-caption-button.close:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
+            <Setter Property="Opacity" Value="0.6" />
+        </Style>
+
+        <!-- ===== PIN digit entry ===== -->
         <Style Selector="TextBox.pin-digit">
-            <Setter Property="Width" Value="38" />
-            <Setter Property="Height" Value="42" />
-            <Setter Property="Padding" Value="2" />
-            <Setter Property="FontSize" Value="22" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Width" Value="46" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Height" Value="52" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="SelectionBrush" Value="{DynamicResource IosBlueBrush}" />
+            <Setter Property="SelectionForegroundBrush" Value="White" />
+            <Setter Property="CaretBrush" Value="{DynamicResource IosBlueBrush}" />
+        </Style>
+
+        <!-- disabled opacity for grouped rows -->
+        <Style Selector="Grid.row:disabled">
+            <Setter Property="Opacity" Value="0.45" />
         </Style>
     </Application.Styles>
 </Application>

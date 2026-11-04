@@ -8,10 +8,10 @@
     xmlns:views="using:UniClip.Views"
     xmlns:vm="using:UniClip.ViewModels"
     Title="UniClip"
-    Width="1160"
+    Width="1120"
     Height="760"
-    MinWidth="1000"
-    MinHeight="700"
+    MinWidth="900"
+    MinHeight="660"
     d:DesignHeight="760"
     d:DesignWidth="1160"
     Icon="/Assets/UniClipIcon.ico"
@@ -21,56 +21,66 @@
             x:Name="TitleBar"
             Grid.Row="0"
             chrome:WindowDecorationProperties.ElementRole="TitleBar"
-            Background="#222328">
+            Background="{DynamicResource IosBgBrush}">
             <Grid ColumnDefinitions="138,*,138">
                 <TextBlock
                     Grid.Column="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="12"
-                    Foreground="#E8E8EC"
+                    FontSize="13"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource IosLabelBrush}"
                     Text="UniClip" />
                 <StackPanel
                     Grid.Column="2"
                     Margin="0,0,8,0"
                     HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
                     Orientation="Horizontal">
                     <Button
                         chrome:WindowDecorationProperties.ElementRole="MinimizeButton"
                         Classes="window-caption-button minimize"
                         Click="MinimizeWindow_OnClick">
-                        <Border Width="10" Height="1" Background="#E8E8EC" />
+                        <Border
+                            Width="10"
+                            Height="1.5"
+                            Margin="0,7,0,0"
+                            Background="{DynamicResource IosLabel2Brush}"
+                            CornerRadius="1" />
                     </Button>
                     <Button
                         x:Name="MaximizeButton"
                         chrome:WindowDecorationProperties.ElementRole="MaximizeButton"
                         Classes="window-caption-button maximize"
                         Click="ToggleWindowState_OnClick">
-                        <Grid Width="16" Height="16">
+                        <Grid Width="14" Height="14">
                             <Border
                                 x:Name="MaximizeGlyph"
                                 Width="10"
                                 Height="10"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                BorderBrush="#E8E8EC"
-                                BorderThickness="1" />
+                                BorderBrush="{DynamicResource IosLabel2Brush}"
+                                BorderThickness="1.5"
+                                CornerRadius="2.5" />
                             <Grid x:Name="RestoreGlyph" IsVisible="False">
                                 <Border
                                     Width="9"
                                     Height="9"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
-                                    BorderBrush="#E8E8EC"
-                                    BorderThickness="1" />
+                                    BorderBrush="{DynamicResource IosLabel2Brush}"
+                                    BorderThickness="1.5"
+                                    CornerRadius="2" />
                                 <Border
                                     Width="9"
                                     Height="9"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Bottom"
-                                    Background="#222328"
-                                    BorderBrush="#E8E8EC"
-                                    BorderThickness="1" />
+                                    Background="{DynamicResource IosBgBrush}"
+                                    BorderBrush="{DynamicResource IosLabel2Brush}"
+                                    BorderThickness="1.5"
+                                    CornerRadius="2" />
                             </Grid>
                         </Grid>
                     </Button>
@@ -78,24 +88,20 @@
                         chrome:WindowDecorationProperties.ElementRole="CloseButton"
                         Classes="window-caption-button close"
                         Click="CloseWindow_OnClick">
-                        <Border
-                            Width="16"
-                            Height="16"
-                            Background="#168BFF"
-                            CornerRadius="8">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="11"
-                                Foreground="White"
-                                TextAlignment="Center"
-                                Text="×" />
-                        </Border>
+                        <Path
+                            Width="9"
+                            Height="9"
+                            Data="M0,0 L9,9 M9,0 L0,9"
+                            Stroke="{DynamicResource IosLabel2Brush}"
+                            StrokeLineCap="Round"
+                            StrokeThickness="1.7" />
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
+
         <views:MainView Grid.Row="1" />
+
         <Grid x:Name="ResizeHandles" IsVisible="False">
             <Border
                 Height="5"

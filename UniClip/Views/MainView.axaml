@@ -10,156 +10,171 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid Background="#0C1110">
-        <Grid Margin="28,20,28,16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Orientation="Horizontal" Spacing="11">
-                    <Image Source="/Assets/Icon.png" Width="38" Height="38" />
-                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                        <TextBlock Text="UniClip" Foreground="#F1F5EF" FontSize="20"
-                            FontWeight="SemiBold" />
-                        <TextBlock Text="PRIVATE DEVICE-TO-DEVICE SHARING" Foreground="#89958A"
-                            FontSize="9" />
-                    </StackPanel>
+    <Grid Background="{DynamicResource IosBgBrush}" RowDefinitions="Auto,*,Auto">
+
+        <!-- ===== Large-title header ===== -->
+        <Grid Grid.Row="0" Margin="24,12,24,0" ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+                <Border Width="50" Height="50" CornerRadius="12" ClipToBounds="True">
+                    <Image Source="/Assets/Icon.png" Stretch="UniformToFill" />
+                </Border>
+                <StackPanel VerticalAlignment="Center" Spacing="1">
+                    <TextBlock Text="UniClip" Classes="large-title" />
+                    <TextBlock
+                        Text="Pair once, then move text and files between devices on your local network."
+                        Classes="footnote" />
                 </StackPanel>
-                <Grid Grid.Column="1">
-                    <Border IsVisible="{Binding IsDisconnected}" CornerRadius="16"
-                        Background="#171F1B" BorderBrush="#29332C" BorderThickness="1"
-                        Padding="12,8" VerticalAlignment="Center">
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                VerticalAlignment="Center">
+                <Border Classes="capsule-ok">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Path Width="12" Height="12" Stretch="Uniform"
+                            Data="M8,11 V8 A4,4 0 0 1 16,8 V11 M5.5,11 H18.5 V20 H5.5 Z"
+                            Stroke="{DynamicResource IosGreenTextBrush}" StrokeThickness="2.4"
+                            StrokeLineCap="Round" StrokeJoin="Round" VerticalAlignment="Center" />
+                        <TextBlock Text="Encrypted · LAN first"
+                            Foreground="{DynamicResource IosGreenTextBrush}" FontSize="12"
+                            FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+                <Grid>
+                    <Border IsVisible="{Binding IsDisconnected}" Classes="capsule">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse Width="7" Height="7" Fill="#89958A"
+                            <Ellipse Width="8" Height="8" Fill="{DynamicResource IosOrangeBrush}"
                                 VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding ConnectionStatus}" Foreground="#C5CEC4"
-                                FontSize="12" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionStatus}"
+                                Foreground="{DynamicResource IosLabelBrush}" FontSize="12.5"
+                                VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border IsVisible="{Binding IsConnected}" CornerRadius="16"
-                        Background="#172219" BorderBrush="#354B34" BorderThickness="1"
-                        Padding="12,8" VerticalAlignment="Center">
+                    <Border IsVisible="{Binding IsConnected}" Classes="capsule-ok">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse Width="7" Height="7" Fill="#B8F36B"
+                            <Ellipse Width="8" Height="8" Fill="{DynamicResource IosGreenBrush}"
                                 VerticalAlignment="Center" />
-                            <TextBlock Text="SECURELY CONNECTED" Foreground="#D6DFD3"
-                                FontSize="10" FontWeight="SemiBold"
-                                VerticalAlignment="Center" />
+                            <TextBlock Text="Securely connected"
+                                Foreground="{DynamicResource IosGreenTextBrush}" FontSize="12.5"
+                                FontWeight="SemiBold" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </Grid>
-            </Grid>
+            </StackPanel>
+        </Grid>
 
-            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Everything you need, in one place." Foreground="#F3F6F1"
-                        FontSize="27" FontWeight="SemiBold" />
-                    <TextBlock
-                        Text="Pair once, then move text and files between devices on your local network."
-                        Foreground="#A1ABA1" FontSize="13" />
-                </StackPanel>
-                <Border Grid.Column="1" CornerRadius="12" Background="#202A23" Padding="10,7"
-                    VerticalAlignment="Center">
-                    <TextBlock Text="ENCRYPTED · LAN FIRST" Foreground="#CFD8CE" FontSize="9"
-                        FontWeight="SemiBold" />
-                </Border>
-            </Grid>
+        <!-- ===== Content ===== -->
+        <Grid Grid.Row="1" Margin="24,20,24,12" ColumnDefinitions="*,*" ColumnSpacing="20">
 
-            <Grid Grid.Row="2" ColumnDefinitions="0.92*,1.08*" ColumnSpacing="14">
-                <Grid>
-                    <Border IsVisible="{Binding IsDisconnected}" Background="#141B17"
-                        BorderBrush="#2D3931" BorderThickness="1" CornerRadius="20" Padding="18">
-                        <StackPanel Spacing="10">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="PAIR YOUR DEVICES" Foreground="#B8F36B" FontSize="10"
-                                FontWeight="Bold" />
-                            <TextBlock Text="Connect in a few steps." Foreground="#F0F4EF"
-                                FontSize="19"
-                                FontWeight="SemiBold" />
-                            <TextBlock
-                                Text="Share this PIN with the other device, then enter its PIN here. Both devices must be on the same local network."
-                                Foreground="#A1ABA1" FontSize="11" TextWrapping="Wrap" />
-                        </StackPanel>
+            <!-- ===== Left: pairing ===== -->
+            <Grid>
+                <Border IsVisible="{Binding IsDisconnected}" Classes="card">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Classes="tile" Background="{DynamicResource IosIndigoBrush}">
+                                    <Path Width="16" Height="16" Stretch="Uniform"
+                                        Data="M8,11 V8 A4,4 0 0 1 16,8 V11 M5.5,11 H18.5 V20 H5.5 Z"
+                                        Stroke="{DynamicResource IosAccentTextBrush}" StrokeThickness="2"
+                                        StrokeLineCap="Round" StrokeJoin="Round"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="Pair your devices" Classes="headline" />
+                                    <TextBlock
+                                        Text="Share this PIN with the other device, then enter its PIN here. Both devices must be on the same local network."
+                                        Classes="footnote" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
 
-                        <Border Background="#0F1511" BorderBrush="#27312A" BorderThickness="1"
-                            CornerRadius="14" Padding="10" Height="112">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Spacing="5">
-                                <TextBlock Text="YOUR PAIRING PIN" Foreground="#89958A" FontSize="9"
-                                    FontWeight="Bold" HorizontalAlignment="Center" />
-                                <TextBlock Text="{Binding DisplayedPairingPin}" Foreground="#B8F36B"
-                                    FontSize="33" FontWeight="Bold" HorizontalAlignment="Center" />
-                                <TextBlock Text="Enter this code on the other device. Expires in 10 minutes."
-                                    Foreground="#A1ABA1" FontSize="10" TextWrapping="Wrap"
-                                    TextAlignment="Center" />
+                            <Border Classes="well" MinHeight="100">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Spacing="3">
+                                    <TextBlock Text="Your pairing PIN" Classes="footnote"
+                                        HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding DisplayedPairingPin}"
+                                        Foreground="{DynamicResource IosGreenTextBrush}"
+                                        FontFamily="{DynamicResource IosMonoFontFamily}"
+                                        FontSize="34" FontWeight="SemiBold" LetterSpacing="2"
+                                        HorizontalAlignment="Center" />
+                                    <TextBlock
+                                        Text="Enter this code on the other device. Expires in 10 minutes."
+                                        Classes="footnote" FontSize="11.5" TextWrapping="Wrap"
+                                        TextAlignment="Center" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
-                        <Button Content="Generate a new PIN"
-                            Command="{Binding CreatePairingCodeCommand}"
-                            IsEnabled="{Binding CanPair}" Classes="secondary" />
-                        <TextBlock Text="{Binding PairingStatus}" Foreground="#A1ABA1" FontSize="10"
-                            TextWrapping="Wrap" MaxHeight="34" />
+                            <Button Content="Generate a new PIN"
+                                Command="{Binding CreatePairingCodeCommand}"
+                                IsEnabled="{Binding CanPair}" Classes="secondary"
+                                HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{Binding PairingStatus}" Classes="footnote"
+                                TextWrapping="Wrap" MaxHeight="34" />
 
-                        <TextBlock Text="ENTER THE OTHER DEVICE'S PIN" Foreground="#89958A"
-                            FontSize="9" FontWeight="Bold" />
-                        <Grid ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="7"
-                            HorizontalAlignment="Center">
-                            <TextBox x:Name="PinDigit1" Grid.Column="0" Tag="1" MaxLength="6"
-                                Text="{Binding PinDigit1}" Classes="pin-digit"
-                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
-                            <TextBox x:Name="PinDigit2" Grid.Column="1" Tag="2" MaxLength="6"
-                                Text="{Binding PinDigit2}" Classes="pin-digit"
-                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
-                            <TextBox x:Name="PinDigit3" Grid.Column="2" Tag="3" MaxLength="6"
-                                Text="{Binding PinDigit3}" Classes="pin-digit"
-                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
-                            <TextBox x:Name="PinDigit4" Grid.Column="3" Tag="4" MaxLength="6"
-                                Text="{Binding PinDigit4}" Classes="pin-digit"
-                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
-                            <TextBox x:Name="PinDigit5" Grid.Column="4" Tag="5" MaxLength="6"
-                                Text="{Binding PinDigit5}" Classes="pin-digit"
-                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
-                            <TextBox x:Name="PinDigit6" Grid.Column="5" Tag="6" MaxLength="6"
-                                Text="{Binding PinDigit6}" Classes="pin-digit"
-                                TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
-                        </Grid>
-                        <Button Content="Pair using PIN"
-                            Command="{Binding ConnectToPinCommand}"
-                            IsEnabled="{Binding CanPair}" HorizontalAlignment="Stretch" Classes="primary" />
-                        <TextBlock
-                            Text="{Binding PairedDeviceCount, StringFormat='{}{0} PAIRED DEVICE'}"
-                            Foreground="#89958A" FontSize="9" FontWeight="Bold"
-                            HorizontalAlignment="Center" />
-                    </StackPanel>
-                </Border>
-
-                <Border IsVisible="{Binding IsConnected}" Background="#141B17"
-                    BorderBrush="#2D3931" BorderThickness="1" CornerRadius="20" Padding="20">
-                    <StackPanel VerticalAlignment="Center" Spacing="16">
-                        <Border Width="54" Height="54" CornerRadius="18"
-                            Background="#202A23" HorizontalAlignment="Center">
-                            <TextBlock Text="✓" Foreground="#B8F36B" FontSize="27"
-                                FontWeight="SemiBold" HorizontalAlignment="Center"
-                                VerticalAlignment="Center" />
-                        </Border>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="DEVICE CONNECTED" Foreground="#B8F36B"
-                                FontSize="10" FontWeight="Bold"
-                                HorizontalAlignment="Center" />
-                            <TextBlock Text="You’re ready to share."
-                                Foreground="#F0F4EF" FontSize="20" FontWeight="SemiBold"
-                                TextAlignment="Center" />
-                            <TextBlock Text="{Binding PairedPeerLabel}"
-                                Foreground="#A1ABA1" FontSize="12"
+                            <TextBlock Text="Enter the other device's PIN" Classes="footnote"
+                                FontWeight="SemiBold" Margin="0,4,0,0" />
+                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8"
+                                HorizontalAlignment="Center">
+                                <TextBox x:Name="PinDigit1" Grid.Column="0" Tag="1" MaxLength="6"
+                                    Text="{Binding PinDigit1}" Classes="pin-digit"
+                                    TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                                <TextBox x:Name="PinDigit2" Grid.Column="1" Tag="2" MaxLength="6"
+                                    Text="{Binding PinDigit2}" Classes="pin-digit"
+                                    TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                                <TextBox x:Name="PinDigit3" Grid.Column="2" Tag="3" MaxLength="6"
+                                    Text="{Binding PinDigit3}" Classes="pin-digit"
+                                    TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                                <TextBox x:Name="PinDigit4" Grid.Column="3" Tag="4" MaxLength="6"
+                                    Text="{Binding PinDigit4}" Classes="pin-digit"
+                                    TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                                <TextBox x:Name="PinDigit5" Grid.Column="4" Tag="5" MaxLength="6"
+                                    Text="{Binding PinDigit5}" Classes="pin-digit"
+                                    TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                                <TextBox x:Name="PinDigit6" Grid.Column="5" Tag="6" MaxLength="6"
+                                    Text="{Binding PinDigit6}" Classes="pin-digit"
+                                    TextChanged="PinDigit_OnTextChanged" KeyDown="PinDigit_OnKeyDown" />
+                            </Grid>
+                            <Button Content="Pair using PIN"
+                                Command="{Binding ConnectToPinCommand}"
+                                IsEnabled="{Binding CanPair}" HorizontalAlignment="Stretch"
+                                Classes="primary" />
+                            <TextBlock
+                                Text="{Binding PairedDeviceCount, StringFormat='{}{0} PAIRED DEVICE'}"
+                                Classes="footnote" FontSize="11" FontWeight="SemiBold"
                                 HorizontalAlignment="Center" />
                         </StackPanel>
-                        <Border Background="#0F1511" BorderBrush="#27312A"
-                            BorderThickness="1" CornerRadius="12" Padding="12">
-                            <StackPanel Orientation="Horizontal" Spacing="9">
-                                <Ellipse Width="7" Height="7" Fill="#B8F36B"
-                                    VerticalAlignment="Center" />
-                                <TextBlock Text="End-to-end encrypted connection"
-                                    Foreground="#C5CEC4" FontSize="10"
-                                    VerticalAlignment="Center" />
-                            </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <Border IsVisible="{Binding IsConnected}" Classes="card" Padding="22">
+                    <StackPanel VerticalAlignment="Center" Spacing="16">
+                        <Border Width="64" Height="64" CornerRadius="32"
+                            Background="{DynamicResource IosGreenBrush}"
+                            HorizontalAlignment="Center">
+                            <Path Width="28" Height="28" Stretch="Uniform"
+                                Data="M4,12.5 L9.5,18 L20,6.5" Stroke="{DynamicResource IosAccentTextBrush}"
+                                StrokeThickness="2.8" StrokeLineCap="Round"
+                                StrokeJoin="Round" HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="You’re ready to share." FontSize="20"
+                                FontWeight="Bold" Foreground="{DynamicResource IosLabelBrush}"
+                                TextAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding PairedPeerLabel}" Classes="footnote"
+                                HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <Border Classes="well">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Classes="tile" Background="{DynamicResource IosGreenBrush}">
+                                    <Path Width="15" Height="15" Stretch="Uniform"
+                                        Data="M8,11 V8 A4,4 0 0 1 16,8 V11 M5.5,11 H18.5 V20 H5.5 Z"
+                                        Stroke="{DynamicResource IosAccentTextBrush}" StrokeThickness="2.2"
+                                        StrokeLineCap="Round" StrokeJoin="Round"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="End-to-end encrypted connection"
+                                    Classes="body" VerticalAlignment="Center" />
+                            </Grid>
                         </Border>
                         <Button Content="Disconnect device"
                             Command="{Binding DisconnectCommand}"
@@ -167,125 +182,133 @@
                             Classes="danger" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Border>
-                </Grid>
+            </Grid>
 
-                <Grid Grid.Column="1" RowDefinitions="*,*" RowSpacing="14">
-                    <Border Background="#141B17" BorderBrush="#28332C" BorderThickness="1"
-                        CornerRadius="20" Padding="17">
-                        <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel Spacing="3">
-                                    <TextBlock Text="CLIPBOARD" Foreground="#89958A" FontSize="9"
-                                        FontWeight="Bold" />
-                                    <TextBlock Text="Pick up where you left off."
-                                        Foreground="#F0F4EF"
-                                        FontSize="16" FontWeight="SemiBold" />
-                                </StackPanel>
-                                <Border Grid.Column="1" Width="34" Height="34" CornerRadius="11"
-                                    Background="#202A23">
-                                    <TextBlock Text="▣" Foreground="#B8F36B" FontSize="17"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                            </Grid>
-                            <Border Grid.Row="1" Background="#0F1511" BorderBrush="#27312A"
-                                BorderThickness="1" CornerRadius="12" Padding="11">
-                                <TextBlock Text="{Binding ClipboardPreview}" Foreground="#BBC5BA"
-                                    FontSize="12" TextWrapping="Wrap" LineHeight="17"
-                                    TextTrimming="CharacterEllipsis" />
+            <!-- ===== Right: clipboard + file drop ===== -->
+            <Grid Grid.Column="1" RowDefinitions="*,*" RowSpacing="20">
+
+                <!-- Clipboard -->
+                <Border Classes="card">
+                    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Classes="tile" Background="{DynamicResource IosBlueBrush}">
+                                <Path Width="16" Height="16" Stretch="Uniform"
+                                    Data="M9,4 H15 V7 H9 Z M7,5.5 H5 V20 H19 V5.5 H17"
+                                    Stroke="{DynamicResource IosAccentTextBrush}" StrokeThickness="2"
+                                    StrokeLineCap="Round" StrokeJoin="Round"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
-                            <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                <Button Content="Preview clipboard" Click="PreviewClipboard_OnClick"
-                                    Classes="secondary" />
-                                <ToggleSwitch Grid.Column="1" Content="Sync clipboard"
+                            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="Clipboard" Classes="headline" />
+                                <TextBlock Text="Pick up where you left off." Classes="footnote" />
+                            </StackPanel>
+                        </Grid>
+                        <Border Grid.Row="1" Classes="well">
+                            <TextBlock Text="{Binding ClipboardPreview}"
+                                Foreground="{DynamicResource IosLabelBrush}"
+                                FontSize="13" TextWrapping="Wrap" LineHeight="18"
+                                TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Button Content="Preview clipboard" Click="PreviewClipboard_OnClick"
+                                Classes="secondary" />
+                            <Grid Grid.Column="1" Classes="row" ColumnDefinitions="*,Auto"
+                                IsEnabled="{Binding CanClipboardSync}" VerticalAlignment="Center">
+                                <TextBlock Text="Sync clipboard" Classes="body"
+                                    VerticalAlignment="Center" HorizontalAlignment="Right"
+                                    Margin="0,0,16,0" />
+                                <ToggleSwitch Grid.Column="1" OnContent="" OffContent=""
                                     IsChecked="{Binding IsClipboardSyncEnabled}"
-                                    IsEnabled="{Binding CanClipboardSync}"
+                                    RenderTransform="scale(1.25)" Margin="0,0,14,0"
                                     VerticalAlignment="Center" />
                             </Grid>
-                            <TextBlock Grid.Row="3" Text="{Binding ClipboardSyncStatus}"
-                                Foreground="#B8F36B" FontSize="10" TextWrapping="Wrap"
-                                TextTrimming="CharacterEllipsis" />
                         </Grid>
-                    </Border>
+                        <TextBlock Grid.Row="3" Text="{Binding ClipboardSyncStatus}"
+                            Classes="accent" TextWrapping="Wrap"
+                            TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
 
-                    <Border Grid.Row="1" Background="#141B17" BorderBrush="#28332C"
-                        BorderThickness="1" CornerRadius="20" Padding="17">
-                        <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel Spacing="3">
-                                    <TextBlock Text="FILE DROP" Foreground="#89958A" FontSize="9"
-                                        FontWeight="Bold" />
-                                    <TextBlock Text="Send files in a moment." Foreground="#F0F4EF"
-                                        FontSize="16" FontWeight="SemiBold" />
-                                </StackPanel>
-                                <Border Grid.Column="1" Width="34" Height="34" CornerRadius="11"
-                                    Background="#202A23">
-                                    <TextBlock Text="↥" Foreground="#B8F36B" FontSize="19"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                            </Grid>
-                            <Border Grid.Row="1" Background="#0F1511" BorderBrush="#27312A"
-                                BorderThickness="1" CornerRadius="12" Padding="10"
-                                ClipToBounds="True">
+                <!-- File drop -->
+                <Border Grid.Row="1" Classes="card">
+                    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Classes="tile" Background="{DynamicResource IosOrangeBrush}">
+                                <Path Width="16" Height="16" Stretch="Uniform"
+                                    Data="M12,16 V5 M7,10 L12,5 L17,10 M5,19 H19"
+                                    Stroke="{DynamicResource IosAccentTextBrush}" StrokeThickness="2"
+                                    StrokeLineCap="Round" StrokeJoin="Round"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="File drop" Classes="headline" />
+                                <TextBlock Text="Send files in a moment." Classes="footnote" />
+                            </StackPanel>
+                        </Grid>
+                        <Border Grid.Row="1" Classes="well" ClipToBounds="True">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <StackPanel Spacing="5">
                                     <TextBlock Text="{Binding FilePickerStatus}"
-                                        Foreground="#BBC5BA"
-                                        FontSize="11" TextWrapping="Wrap"
+                                        Foreground="{DynamicResource IosLabelBrush}"
+                                        FontSize="13" TextWrapping="Wrap"
                                         TextTrimming="CharacterEllipsis" />
                                     <ItemsControl ItemsSource="{Binding SelectedFiles}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Name}"
-                                                    Foreground="#89958A"
-                                                    FontSize="10"
+                                                    Foreground="{DynamicResource IosLabel2Brush}"
+                                                    FontSize="12.5"
                                                     TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                            <Button Content="Choose files" Click="ChooseFiles_OnClick"
+                                Classes="secondary" />
+                            <Button Content="Send selected"
+                                Command="{Binding SendSelectedFilesCommand}"
+                                IsEnabled="{Binding CanSendFiles}" Classes="primary" />
+                        </StackPanel>
+                        <Grid Grid.Row="3">
+                            <TextBlock Text="{Binding TransferStatus}" Classes="footnote"
+                                TextWrapping="Wrap" MaxHeight="34"
+                                TextTrimming="CharacterEllipsis" />
+                            <Border IsVisible="{Binding HasIncomingTransferRequest}"
+                                Background="{DynamicResource IosBlueTintBrush}"
+                                CornerRadius="12" Padding="12,10">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="Incoming file · approve to receive"
+                                            Foreground="{DynamicResource IosGreenTextBrush}"
+                                            FontSize="13" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding IncomingTransferPrompt}"
+                                            Foreground="{DynamicResource IosLabel2Brush}"
+                                            FontSize="11.5" TextWrapping="Wrap"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                        VerticalAlignment="Center" Spacing="6">
+                                        <Button Content="Accept"
+                                            Command="{Binding AcceptIncomingTransferCommand}"
+                                            Classes="primary" Padding="14,4" MinHeight="30" />
+                                        <Button Content="Decline"
+                                            Command="{Binding RejectIncomingTransferCommand}"
+                                            Classes="secondary" Padding="14,4" MinHeight="30" />
+                                    </StackPanel>
+                                </Grid>
                             </Border>
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
-                                <Button Content="Choose files" Click="ChooseFiles_OnClick"
-                                    Classes="secondary" />
-                                <Button Content="Send selected"
-                                    Command="{Binding SendSelectedFilesCommand}"
-                                    IsEnabled="{Binding CanSendFiles}" Classes="primary" />
-                            </StackPanel>
-                            <Grid Grid.Row="3">
-                                <TextBlock Text="{Binding TransferStatus}" Foreground="#A1ABA1"
-                                    FontSize="10" TextWrapping="Wrap" MaxHeight="34"
-                                    TextTrimming="CharacterEllipsis" />
-                                <Border IsVisible="{Binding HasIncomingTransferRequest}"
-                                    Background="#202A23" BorderBrush="#354136" BorderThickness="1"
-                                    CornerRadius="11" Padding="9">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                        <StackPanel Spacing="3">
-                                            <TextBlock Text="Incoming file · approve to receive"
-                                                Foreground="#B8F36B" FontSize="10"
-                                                FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding IncomingTransferPrompt}"
-                                                Foreground="#D6DFD3" FontSize="9"
-                                                TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                            VerticalAlignment="Center" Spacing="5">
-                                            <Button Content="Accept"
-                                                Command="{Binding AcceptIncomingTransferCommand}"
-                                                Classes="primary" Padding="8,6" />
-                                            <Button Content="Decline"
-                                                Command="{Binding RejectIncomingTransferCommand}"
-                                                Classes="secondary" Padding="8,6" />
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </Grid>
                         </Grid>
-                    </Border>
-                </Grid>
+                    </Grid>
+                </Border>
             </Grid>
-
-            <TextBlock Grid.Row="3"
-                Text="Noise · X25519  /  Transfers are recipient-approved and SHA-256 verified"
-                Foreground="#58635A" FontSize="9" HorizontalAlignment="Center" />
         </Grid>
+
+        <!-- ===== Footer ===== -->
+        <TextBlock Grid.Row="2" Margin="24,0,24,14"
+            Text="Noise · X25519  /  Transfers are recipient-approved and SHA-256 verified"
+            Classes="footnote" FontSize="11" HorizontalAlignment="Center" />
     </Grid>
 </UserControl>
