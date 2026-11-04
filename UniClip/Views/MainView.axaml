@@ -331,8 +331,14 @@
         </Grid>
 
         <!-- ===== Footer ===== -->
-        <TextBlock Grid.Row="2" Margin="24,0,24,14"
-            Text="Noise · X25519  /  Transfers are recipient-approved and SHA-256 verified"
-            Classes="footnote" FontSize="11" HorizontalAlignment="Center" />
+        <StackPanel Grid.Row="2" Margin="24,0,24,12" Spacing="2" HorizontalAlignment="Center">
+            <TextBlock Text="Prototype notice: UniClip has not received an independent security review."
+                Foreground="{DynamicResource IosWifiDisconnectedBrush}" FontSize="11.5"
+                FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" />
+            <HyperlinkButton Classes="security-link"
+                Content="Read Security and privacy before using it with sensitive data"
+                NavigateUri="https://github.com/Gowsi-kan/UniClip#security-and-privacy"
+                HorizontalAlignment="Center" />
+        </StackPanel>
     </Grid>
 </UserControl>

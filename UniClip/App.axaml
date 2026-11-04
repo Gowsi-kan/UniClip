@@ -292,6 +292,23 @@
             <Setter Property="Foreground" Value="{DynamicResource IosAccentTextBrush}" />
         </Style>
 
+        <Style Selector="HyperlinkButton.security-link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource IosGreenTextBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="16" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="HyperlinkButton.security-link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource IosGreenTextBrush}" />
+            <Setter Property="Opacity" Value="0.75" />
+        </Style>
+
         <!-- destructive -->
         <Style Selector="Button.danger">
             <Setter Property="Background" Value="{DynamicResource IosRedTintBrush}" />
