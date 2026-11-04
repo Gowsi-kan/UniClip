@@ -36,6 +36,8 @@
                     <SolidColorBrush x:Key="IosGreenBrush" Color="#B8F36B" />
                     <SolidColorBrush x:Key="IosGreenTintBrush" Color="#1FB8F36B" />
                     <SolidColorBrush x:Key="IosGreenTextBrush" Color="#42651F" />
+                    <SolidColorBrush x:Key="IosWifiDisconnectedBrush" Color="#C62828" />
+                    <SolidColorBrush x:Key="IosWifiDisconnectedTintBrush" Color="#1FC62828" />
                     <SolidColorBrush x:Key="IosRedBrush" Color="#B8F36B" />
                     <SolidColorBrush x:Key="IosRedTintBrush" Color="#1FB8F36B" />
                     <SolidColorBrush x:Key="IosOrangeBrush" Color="#B8F36B" />
@@ -99,6 +101,8 @@
                     <SolidColorBrush x:Key="IosGreenBrush" Color="#B8F36B" />
                     <SolidColorBrush x:Key="IosGreenTintBrush" Color="#33B8F36B" />
                     <SolidColorBrush x:Key="IosGreenTextBrush" Color="#B8F36B" />
+                    <SolidColorBrush x:Key="IosWifiDisconnectedBrush" Color="#FF6B6B" />
+                    <SolidColorBrush x:Key="IosWifiDisconnectedTintBrush" Color="#33FF6B6B" />
                     <SolidColorBrush x:Key="IosRedBrush" Color="#B8F36B" />
                     <SolidColorBrush x:Key="IosRedTintBrush" Color="#33B8F36B" />
                     <SolidColorBrush x:Key="IosOrangeBrush" Color="#B8F36B" />
@@ -212,6 +216,12 @@
         </Style>
         <Style Selector="Border.capsule-ok">
             <Setter Property="Background" Value="{DynamicResource IosGreenTintBrush}" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.capsule-alert">
+            <Setter Property="Background" Value="{DynamicResource IosWifiDisconnectedTintBrush}" />
             <Setter Property="CornerRadius" Value="16" />
             <Setter Property="Padding" Value="12,6" />
             <Setter Property="VerticalAlignment" Value="Center" />
